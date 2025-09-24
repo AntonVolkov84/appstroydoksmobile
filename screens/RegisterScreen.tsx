@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, Alert, StyleSheet } from "react-native";
+import { View, Text, TextInput, Alert, StyleSheet } from "react-native";
 import axios from "axios";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
+import Button from "../components/Button";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Register">;
 
@@ -44,19 +45,29 @@ export default function RegisterScreen({ navigation }: Props) {
         value={password}
         onChangeText={setPassword}
       />
-      <Button title="Зарегистрироваться" onPress={handleRegister} />
+      <Button title="Зарегистрироваться" containerStyle={{ marginTop: 70 }} onPress={handleRegister} />
+      <Button title="Логин" containerStyle={{ marginTop: 5 }} onPress={() => navigation.navigate("Login")} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 20 },
-  title: { fontSize: 24, marginBottom: 20, textAlign: "center" },
+  container: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f2f2f2", padding: 20 },
+  card: {
+    width: "100%",
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 20,
+    elevation: 3,
+  },
+  title: { fontSize: 26, fontWeight: "700", textAlign: "center", marginBottom: 20 },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 10,
-    marginVertical: 5,
-    borderRadius: 5,
+    width: 200,
+    borderColor: "#ddd",
+    padding: 12,
+    marginVertical: 8,
+    borderRadius: 8,
+    fontSize: 16,
   },
 });
