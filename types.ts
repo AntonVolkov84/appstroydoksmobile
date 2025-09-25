@@ -1,3 +1,7 @@
+export enum Role {
+  foreman = "foreman",
+  worker = "worker",
+}
 export interface User {
   id: number;
   username: string;
@@ -5,4 +9,5 @@ export interface User {
   name: string;
   surname: string;
   emailconfirmed: boolean;
+  role: Role;
 }
