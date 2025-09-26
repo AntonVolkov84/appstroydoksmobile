@@ -18,7 +18,7 @@ export default function LoginScreen({ navigation }: Props) {
   const handleLogin = async () => {
     try {
       const res = await axios.post("https://api.stroydoks.ru/mobile/login", {
-        email,
+        email: email.toLowerCase(),
         password,
       });
       const { accessToken, refreshToken, user } = res.data;

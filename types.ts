@@ -11,3 +11,9 @@ export interface User {
   emailconfirmed: boolean;
   role: Role;
 }
+
+export type ObjectItem = {
+  id: number;
+  name: string;
+  address: string;
+};

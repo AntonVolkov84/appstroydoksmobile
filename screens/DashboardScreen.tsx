@@ -4,7 +4,6 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import Button from "../components/Button";
 import AppMenuBottomSheet from "../components/AppMenuBottomSheet";
 import { Role } from "../types";
 
@@ -76,8 +75,8 @@ export default function DashboardScreen({ route, navigation }: Props) {
         currentUser={currentUser}
         onLogout={handleLogout}
         onToggleRole={toggleRole}
-        onManageObjects={() => console.log("ManageObjects")}
-        onManageWorkers={() => console.log("ManageWorkers")}
+        onManageObjects={() => navigation.navigate("Objects")}
+        onManageWorkers={() => navigation.navigate("Workers")}
       />
     </View>
   );

@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import Modal from "react-native-modal";
 import { User } from "../types";
 
-type Props = {
+type AppMenuBottomSheetProps = {
   role: "worker" | "foreman";
   onLogout: () => void;
   onToggleRole: () => void;
@@ -19,7 +19,7 @@ export default function AppMenuBottomSheet({
   onToggleRole,
   onManageObjects,
   onManageWorkers,
-}: Props) {
+}: AppMenuBottomSheetProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   const openMenu = () => setIsVisible(true);
@@ -59,13 +59,17 @@ export default function AppMenuBottomSheet({
 const styles = StyleSheet.create({
   menuButton: {
     position: "absolute",
-    top: 50,
-    right: 20,
+    top: 70,
+    right: 30,
     zIndex: 100,
     backgroundColor: "#fff",
     borderRadius: 10,
-    padding: 8,
     elevation: 5,
+    aspectRatio: 1,
+    height: 45,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
   },
   menuText: { fontSize: 28 },
   modal: {

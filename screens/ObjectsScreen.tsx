@@ -1,0 +1,140 @@
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, Alert } from "react-native";
+import axios from "axios";
+import Button from "../components/Button";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../App";
+import { ObjectItem } from "../types";
+
+type ObjectScreenProps = NativeStackScreenProps<RootStackParamList, "Objects">;
+
+export default function ObjectsScreen({ navigation }: ObjectScreenProps) {
+  const [objects, setObjects] = useState<ObjectItem[]>([]);
+  const [newName, setNewName] = useState("");
+  const [newAddress, setNewAddress] = useState("");
+
+  useEffect(() => {
+    // fetchObjects();
+  }, []);
+
+  const fetchObjects = async () => {
+    try {
+      const token = await AsyncStorage.getItem("accessToken");
+      const res = await axios.get("https://api.stroydoks.ru/mobile/objects", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setObjects(res.data);
+    } catch (err) {
+      console.error("Ошибка загрузки объектов", err);
+      Alert.alert("Ошибка", "Не удалось загрузить объекты");
+    }
+  };
+
+  const addObject = async () => {
+    if (!newName.trim() || !newAddress.trim()) {
+      Alert.alert("Ошибка", "Введите название и адрес");
+      return;
+    }
+    try {
+      const token = await AsyncStorage.getItem("accessToken");
+      const res = await axios.post(
+        "https://api.stroydoks.ru/mobile/objects",
+        { name: newName, address: newAddress },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setObjects((prev) => [...prev, res.data]); // сервер возвращает созданный объект
+      setNewName("");
+      setNewAddress("");
+    } catch (err) {
+      console.error("Ошибка добавления объекта", err);
+      Alert.alert("Ошибка", "Не удалось создать объект");
+    }
+  };
+
+  const deleteObject = async (id: number) => {
+    try {
+      const token = await AsyncStorage.getItem("accessToken");
+      await axios.delete(`https://api.stroydoks.ru/mobile/objects/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setObjects((prev) => prev.filter((obj) => obj.id !== id));
+    } catch (err) {
+      console.error("Ошибка удаления объекта", err);
+      Alert.alert("Ошибка", "Не удалось удалить объект");
+    }
+  };
+
+  const renderItem = ({ item }: { item: ObjectItem }) => (
+    <View style={styles.item}>
+      <View>
+        <Text style={styles.name}>{item.name}</Text>
+        <Text style={styles.address}>{item.address}</Text>
+      </View>
+      <TouchableOpacity style={styles.deleteButton} onPress={() => deleteObject(item.id)}>
+        <Text style={{ color: "#fff" }}>Удалить</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Объекты</Text>
+      <TextInput style={styles.input} placeholder="Название объекта" value={newName} onChangeText={setNewName} />
+      <TextInput style={styles.input} placeholder="Адрес объекта" value={newAddress} onChangeText={setNewAddress} />
+      <TouchableOpacity style={styles.addButton} onPress={addObject}>
+        <Text style={styles.addButtonText}>Создать объект</Text>
+      </TouchableOpacity>
+      <FlatList
+        data={objects}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderItem}
+        contentContainerStyle={{ paddingBottom: 40 }}
+      />
+      <Button containerStyle={{ marginBottom: 40 }} title="Назад" onPress={() => navigation.goBack()} />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 20, backgroundColor: "#f9f9f9", paddingTop: 50 },
+  title: { fontSize: 22, fontWeight: "700", marginBottom: 20, textAlign: "center" },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
+    backgroundColor: "#fff",
+  },
+  addButton: {
+    backgroundColor: "#007AFF",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  addButtonText: { color: "#fff", fontWeight: "600" },
+  item: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 15,
+    borderRadius: 8,
+    backgroundColor: "#fff",
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  name: { fontSize: 16, fontWeight: "600" },
+  address: { fontSize: 14, color: "#666" },
+  deleteButton: {
+    backgroundColor: "red",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+});
