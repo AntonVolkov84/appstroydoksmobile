@@ -17,3 +17,10 @@ export type ObjectItem = {
   name: string;
   address: string;
 };
+export interface ObjectItemData {
+  address: string;
+  author_id: number;
+  created_at: string;
+  id: number;
+  title: string;
+}

@@ -5,25 +5,23 @@ import Button from "../components/Button";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
-import { ObjectItem } from "../types";
+import { ObjectItem, ObjectItemData } from "../types";
+import api, { authRequest } from "../api";
 
 type ObjectScreenProps = NativeStackScreenProps<RootStackParamList, "Objects">;
 
 export default function ObjectsScreen({ navigation }: ObjectScreenProps) {
-  const [objects, setObjects] = useState<ObjectItem[]>([]);
+  const [objects, setObjects] = useState<ObjectItemData[]>([]);
   const [newName, setNewName] = useState("");
   const [newAddress, setNewAddress] = useState("");
 
   useEffect(() => {
-    // fetchObjects();
+    fetchObjects();
   }, []);
 
   const fetchObjects = async () => {
     try {
-      const token = await AsyncStorage.getItem("accessToken");
-      const res = await axios.get("https://api.stroydoks.ru/mobile/objects", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await authRequest((token) => api.get("/objects", { headers: { Authorization: `Bearer ${token}` } }));
       setObjects(res.data);
     } catch (err) {
       console.error("Ошибка загрузки объектов", err);
@@ -37,13 +35,10 @@ export default function ObjectsScreen({ navigation }: ObjectScreenProps) {
       return;
     }
     try {
-      const token = await AsyncStorage.getItem("accessToken");
-      const res = await axios.post(
-        "https://api.stroydoks.ru/mobile/objects",
-        { name: newName, address: newAddress },
-        { headers: { Authorization: `Bearer ${token}` } }
+      const res = await authRequest((token) =>
+        api.post("/objects", { title: newName, address: newAddress }, { headers: { Authorization: `Bearer ${token}` } })
       );
-      setObjects((prev) => [...prev, res.data]); // сервер возвращает созданный объект
+      setObjects((prev) => [...prev, res.data]);
       setNewName("");
       setNewAddress("");
     } catch (err) {
@@ -52,26 +47,34 @@ export default function ObjectsScreen({ navigation }: ObjectScreenProps) {
     }
   };
 
-  const deleteObject = async (id: number) => {
-    try {
-      const token = await AsyncStorage.getItem("accessToken");
-      await axios.delete(`https://api.stroydoks.ru/mobile/objects/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setObjects((prev) => prev.filter((obj) => obj.id !== id));
-    } catch (err) {
-      console.error("Ошибка удаления объекта", err);
-      Alert.alert("Ошибка", "Не удалось удалить объект");
-    }
+  const deleteObject = (id: number, title: string) => {
+    Alert.alert("Удалить объект", `Вы уверены, что хотите удалить объект "${title}"?`, [
+      { text: "Отмена", style: "cancel" },
+      {
+        text: "Удалить",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await authRequest((token) =>
+              api.delete(`/objects/${id}`, { headers: { Authorization: `Bearer ${token}` } })
+            );
+            setObjects((prev) => prev.filter((obj) => obj.id !== id));
+          } catch (err) {
+            console.error("Ошибка удаления объекта", err);
+            Alert.alert("Ошибка", "Не удалось удалить объект");
+          }
+        },
+      },
+    ]);
   };
 
-  const renderItem = ({ item }: { item: ObjectItem }) => (
+  const renderItem = ({ item }: { item: ObjectItemData }) => (
     <View style={styles.item}>
       <View>
-        <Text style={styles.name}>{item.name}</Text>
+        <Text style={styles.name}>{item.title}</Text>
         <Text style={styles.address}>{item.address}</Text>
       </View>
-      <TouchableOpacity style={styles.deleteButton} onPress={() => deleteObject(item.id)}>
+      <TouchableOpacity style={styles.deleteButton} onPress={() => deleteObject(item.id, item.title)}>
         <Text style={{ color: "#fff" }}>Удалить</Text>
       </TouchableOpacity>
     </View>
@@ -129,8 +132,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  name: { fontSize: 16, fontWeight: "600" },
-  address: { fontSize: 14, color: "#666" },
+  name: { fontSize: 16, fontWeight: "800", color: "#666" },
+  address: { fontSize: 14, fontWeight: "500", color: "#666" },
   deleteButton: {
     backgroundColor: "red",
     paddingHorizontal: 12,

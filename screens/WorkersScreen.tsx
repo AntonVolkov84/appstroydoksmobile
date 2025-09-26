@@ -6,6 +6,7 @@ import axios from "axios";
 import { User } from "../types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
+import api, { authRequest } from "../api";
 
 type WorkersScreenProps = NativeStackScreenProps<RootStackParamList, "Workers">;
 
@@ -16,40 +17,37 @@ export default function WorkersScreen({ navigation }: WorkersScreenProps) {
 
   const fetchWorkers = async () => {
     try {
-      const token = await AsyncStorage.getItem("accessToken");
-      const res = await axios.get("https://api.stroydoks.ru/mobile/workers", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await authRequest((token) => api.get("/workers", { headers: { Authorization: `Bearer ${token}` } }));
       setWorkers(res.data);
     } catch (err) {
       console.error(err);
-      Alert.alert("Ошибка", "Не удалось получить список рабочих");
+      Alert.alert("Ошибка", "Не удалось загрузить список рабочих");
     }
   };
-
   useEffect(() => {
-    // fetchWorkers();
+    fetchWorkers();
   }, []);
 
   const addWorker = async () => {
     if (!newEmail) return;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newEmail.trim())) {
+      Alert.alert("Ошибка", "Введите корректный email");
+      setNewEmail("");
+      return;
+    }
     try {
-      const token = await AsyncStorage.getItem("accessToken");
-      await axios.post(
-        "https://api.stroydoks.ru/mobile/workers",
-        { email: newEmail },
-        { headers: { Authorization: `Bearer ${token}` } }
+      await authRequest((token) =>
+        api.post("/workers", { email: newEmail }, { headers: { Authorization: `Bearer ${token}` } })
       );
+      fetchWorkers();
       setNewEmail("");
       setModalVisible(false);
-      // fetchWorkers();
     } catch (err) {
       console.error(err);
       Alert.alert("Ошибка", "Не удалось добавить рабочего");
     }
   };
-
-  // Удаление рабочего по longPress
   const deleteWorker = (worker: User) => {
     Alert.alert("Удалить рабочего", `Вы уверены, что хотите удалить ${worker.name} ${worker.surname}?`, [
       { text: "Отмена", style: "cancel" },
@@ -58,13 +56,14 @@ export default function WorkersScreen({ navigation }: WorkersScreenProps) {
         style: "destructive",
         onPress: async () => {
           try {
-            const token = await AsyncStorage.getItem("accessToken");
-            await axios.delete(`https://api.stroydoks.ru/mobile/workers/${worker.id}`, {
-              headers: { Authorization: `Bearer ${token}` },
-            });
+            await authRequest((token) =>
+              api.delete(`/workers/${worker.id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+              })
+            );
             fetchWorkers();
           } catch (err) {
-            console.error(err);
+            console.error("Ошибка при удалении рабочего:", err);
             Alert.alert("Ошибка", "Не удалось удалить рабочего");
           }
         },
@@ -83,7 +82,7 @@ export default function WorkersScreen({ navigation }: WorkersScreenProps) {
   return (
     <View style={styles.container}>
       <Button title="Добавить рабочего" onPress={() => setModalVisible(true)} />
-
+      <Text style={{ textAlign: "center", marginTop: 5 }}>Для удаления - долгое нажатие на рабочего</Text>
       <FlatList
         data={workers}
         keyExtractor={(item) => item.id.toString()}
