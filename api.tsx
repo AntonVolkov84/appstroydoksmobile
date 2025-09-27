@@ -34,6 +34,9 @@ export const authRequest = async (makeRequest: (token: string) => Promise<any>) 
       if (!newAccessToken) throw new Error("Unable to refresh token");
       return await makeRequest(newAccessToken);
     }
+    if (err.response?.data) {
+      throw err.response.data;
+    }
     throw err;
   }
 };

@@ -43,9 +43,10 @@ export default function WorkersScreen({ navigation }: WorkersScreenProps) {
       fetchWorkers();
       setNewEmail("");
       setModalVisible(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      Alert.alert("Ошибка", "Не удалось добавить рабочего");
+      const message = err.error || "Не удалось добавить рабочего";
+      Alert.alert("Ошибка", message);
     }
   };
   const deleteWorker = (worker: User) => {
