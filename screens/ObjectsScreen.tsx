@@ -69,7 +69,10 @@ export default function ObjectsScreen({ navigation }: ObjectScreenProps) {
   };
 
   const renderItem = ({ item }: { item: ObjectItemData }) => (
-    <View style={styles.item}>
+    <TouchableOpacity
+      style={styles.item}
+      onPress={() => navigation.navigate("ObjectWorkers", { objectId: item.id, object: item })}
+    >
       <View>
         <Text style={styles.name}>{item.title}</Text>
         <Text style={styles.address}>{item.address}</Text>
@@ -77,7 +80,7 @@ export default function ObjectsScreen({ navigation }: ObjectScreenProps) {
       <TouchableOpacity style={styles.deleteButton} onPress={() => deleteObject(item.id, item.title)}>
         <Text style={{ color: "#fff" }}>Удалить</Text>
       </TouchableOpacity>
-    </View>
+    </TouchableOpacity>
   );
 
   return (

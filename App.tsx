@@ -5,9 +5,10 @@ import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from "./screens/RegisterScreen";
 import DashboardScreen from "./screens/DashboardScreen";
 import AuthLoading from "./screens/AuthLoadingScreen";
-import { User } from "./types";
+import { User, ObjectItemData } from "./types";
 import ObjectsScreen from "./screens/ObjectsScreen";
 import WorkersScreen from "./screens/WorkersScreen";
+import ObjectWorkersScreen from "./screens/ObjectWorkersScreen";
 
 export type RootStackParamList = {
   Login: undefined;
@@ -15,6 +16,7 @@ export type RootStackParamList = {
   AuthLoading: undefined;
   Dashboard: { user: User };
   Objects: undefined;
+  ObjectWorkers: { objectId: number; object: ObjectItemData };
   Workers: undefined;
 };
 
@@ -24,12 +26,21 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="AuthLoading">
-        <Stack.Screen name="AuthLoading" component={AuthLoading} options={{ headerShown: false }} />
-        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Dashboard" component={DashboardScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Objects" component={ObjectsScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Workers" component={WorkersScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="AuthLoading" component={AuthLoading} options={{ headerShown: false, animation: "none" }} />
+        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false, animation: "none" }} />
+        <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false, animation: "none" }} />
+        <Stack.Screen
+          name="Dashboard"
+          component={DashboardScreen}
+          options={{ headerShown: false, animation: "none" }}
+        />
+        <Stack.Screen name="Objects" component={ObjectsScreen} options={{ headerShown: false, animation: "none" }} />
+        <Stack.Screen name="Workers" component={WorkersScreen} options={{ headerShown: false, animation: "none" }} />
+        <Stack.Screen
+          name="ObjectWorkers"
+          component={ObjectWorkersScreen}
+          options={{ headerShown: false, animation: "none" }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
