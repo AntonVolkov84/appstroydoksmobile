@@ -71,7 +71,7 @@ export default function ObjectsScreen({ navigation }: ObjectScreenProps) {
   const renderItem = ({ item }: { item: ObjectItemData }) => (
     <TouchableOpacity
       style={styles.item}
-      onPress={() => navigation.navigate("ObjectWorkers", { objectId: item.id, object: item })}
+      onPress={() => navigation.replace("ObjectWorkers", { objectId: item.id, object: item })}
     >
       <View>
         <Text style={styles.name}>{item.title}</Text>
@@ -104,7 +104,7 @@ export default function ObjectsScreen({ navigation }: ObjectScreenProps) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: "#f9f9f9", paddingTop: 50 },
-  title: { fontSize: 22, fontWeight: "700", marginBottom: 20, textAlign: "center" },
+  title: { fontSize: 22, fontWeight: "700", marginBottom: 20, textAlign: "center", maxWidth: "70%" },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   name: { fontSize: 16, fontWeight: "800", color: "#666" },
-  address: { fontSize: 14, fontWeight: "500", color: "#666" },
+  address: { fontSize: 14, fontWeight: "500", color: "#666", maxWidth: "70%" },
   deleteButton: {
     backgroundColor: "red",
     paddingHorizontal: 12,

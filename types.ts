@@ -17,6 +17,10 @@ export type ObjectItem = {
   name: string;
   address: string;
 };
+type WebSocketMessage = {
+  type: "assigned_to_object";
+  object: ObjectItemData;
+};
 export interface ObjectItemData {
   address: string;
   author_id: number;
