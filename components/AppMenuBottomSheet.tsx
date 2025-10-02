@@ -37,7 +37,7 @@ export default function AppMenuBottomSheet({
               {currentUser.role === "foreman" ? "Переключить роль на рабочего" : "Переключить роль на Прораба"}
             </Text>
           </TouchableOpacity>
-          {role === "foreman" && (
+          {currentUser.role === "foreman" && (
             <>
               <TouchableOpacity style={styles.item} onPress={onManageObjects}>
                 <Text>Управление объектами</Text>

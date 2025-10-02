@@ -17,14 +17,20 @@ export type ObjectItem = {
   name: string;
   address: string;
 };
-type WebSocketMessage = {
-  type: "assigned_to_object";
-  object: ObjectItemData;
-};
+export type WSMessage = { type: "assigned_to_object"; object: ObjectItemData } | { type: "work"; object: WorkItem };
 export interface ObjectItemData {
   address: string;
   author_id: number;
   created_at: string;
   id: number;
   title: string;
+}
+export interface WorkItem {
+  id: number;
+  objectId: number;
+  title: string;
+  unit: string;
+  quantity: number;
+  accepted: boolean;
+  createdBy: number;
 }

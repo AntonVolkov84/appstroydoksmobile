@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ObjectItemData } from "../types";
+import { WSMessage } from "../types";
 
-export const useWebSocketObjects = (onNewObject: (obj: ObjectItemData) => void) => {
+export const useWebSocketObjects = (onNewObject: (obj: WSMessage) => void) => {
   useEffect(() => {
     let ws: WebSocket;
 
@@ -17,6 +17,9 @@ export const useWebSocketObjects = (onNewObject: (obj: ObjectItemData) => void) 
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
         if (data.type === "assigned_to_object") {
+          onNewObject(data.object);
+        }
+        if (data.type === "work") {
           onNewObject(data.object);
         }
       };

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { View, Text, StyleSheet, FlatList, Dimensions, Alert } from "react-native";
+import { View, Text, StyleSheet, FlatList, Alert, TouchableOpacity } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -10,6 +10,7 @@ import { useWebSocketObjects } from "../hooks/websockethooks";
 import { ObjectItemData } from "../types";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect } from "@react-navigation/native";
+import { authRequest } from "../api";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Dashboard">;
 
@@ -55,34 +56,18 @@ export default function DashboardScreen({ route, navigation }: Props) {
 
   const toggleRole = async () => {
     if (!currentUser) return;
-    const newRole = currentUser.role === "foreman" ? "worker" : "foreman";
-    const makeRequest = async (token: string) => {
-      return axios.put(
-        "https://api.stroydoks.ru/mobile/toggle-role",
-        { role: newRole },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-    };
+
     try {
-      let accessToken = await AsyncStorage.getItem("accessToken");
-      if (!accessToken) throw new Error("No access token");
-      try {
-        await makeRequest(accessToken);
-      } catch (err: any) {
-        if (err.response?.status === 403) {
-          const refreshToken = await AsyncStorage.getItem("refreshToken");
-          if (!refreshToken) throw new Error("No refresh token");
-          const res = await axios.post("https://api.stroydoks.ru/mobile/refresh-token", { token: refreshToken });
-          accessToken = res.data.accessToken;
-          await AsyncStorage.setItem("accessToken", accessToken!);
-          await makeRequest(accessToken!);
-        } else {
-          throw err;
-        }
-      }
+      const res = await authRequest(async (token) => {
+        return axios.put(
+          "https://api.stroydoks.ru/mobile/toggle-role",
+          {},
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      });
       setCurrentUser((prev) => ({
         ...prev,
-        role: prev.role === Role.foreman ? Role.worker : Role.foreman,
+        role: res.data.role,
       }));
     } catch (err) {
       console.error("Failed to toggle role", err);
@@ -117,8 +102,10 @@ export default function DashboardScreen({ route, navigation }: Props) {
               alignItems: "center",
             }}
           >
-            <Text style={styles.objectTitle}>{item.title}</Text>
-            <Text style={styles.objectAddress}>{item.address}</Text>
+            <TouchableOpacity onPress={() => navigation.navigate("ObjectDetails", { currentUser, objectId: item.id })}>
+              <Text style={styles.objectTitle}>{item.title}</Text>
+              <Text style={styles.objectAddress}>{item.address}</Text>
+            </TouchableOpacity>
           </LinearGradient>
         )}
       />
