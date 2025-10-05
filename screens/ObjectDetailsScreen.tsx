@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, FlatList, StyleSheet, TextInput, Button, Switch, Alert } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, FlatList, StyleSheet, Modal, TextInput, Switch, Alert, TouchableOpacity } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useWebSocketObjects } from "../hooks/websockethooks";
-import { WorkItem } from "../types";
+import { WorkItem, WSMessage } from "../types";
 import { authRequest } from "../api";
+import Button from "../components/Button";
+import { Pencil, Trash2, Copy } from "lucide-react-native";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ObjectDetails">;
 
@@ -16,6 +18,12 @@ export default function ObjectDetailsScreen({ route }: Props) {
   const [title, setTitle] = useState("");
   const [unit, setUnit] = useState("");
   const [quantity, setQuantity] = useState("");
+
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editWorkItem, setEditWorkItem] = useState<WorkItem | null>(null);
+  const [editQuantity, setEditQuantity] = useState("");
+  const [editTitle, setEditTitle] = useState("");
+  const [editUnit, setEditUnit] = useState("");
 
   const fetchWorks = async () => {
     try {
@@ -36,13 +44,91 @@ export default function ObjectDetailsScreen({ route }: Props) {
     fetchWorks();
   }, []);
 
-  useWebSocketObjects((newWork) => {
-    if (newWork.type === "work") {
-      if (newWork.object.objectId === objectId) {
-        setWorks((prev) => [...prev, newWork.object]);
-      }
+  const openEditModal = (work: WorkItem) => {
+    setEditWorkItem(work);
+    setEditTitle(work.title);
+    setEditUnit(work.unit);
+    setEditQuantity(work.quantity.toString());
+    setEditModalVisible(true);
+  };
+
+  const saveEdit = async () => {
+    if (!editWorkItem) return;
+
+    try {
+      await authRequest(async (token) => {
+        await axios.put(
+          `https://api.stroydoks.ru/mobile/objects/works/${editWorkItem.id}`,
+          {
+            title: editTitle,
+            unit: editUnit,
+            quantity: editQuantity,
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      });
+      setWorks((prev) =>
+        prev.map((w) =>
+          w.id === editWorkItem.id ? { ...w, title: editTitle, unit: editUnit, quantity: Number(editQuantity) } : w
+        )
+      );
+
+      setEditModalVisible(false);
+    } catch (err) {
+      Alert.alert("Ошибка", "Не удалось изменить работу");
+    }
+  };
+
+  useWebSocketObjects((msg: WSMessage) => {
+    if (msg.type === "work") {
+      setWorks((prev) => {
+        const exists = prev.some((w) => w.id === msg.object.id);
+        if (exists) return prev;
+        return [...prev, msg.object];
+      });
     }
   });
+
+  const deleteWork = async (workId: number) => {
+    Alert.alert("Удалить работу?", "Это действие нельзя отменить", [
+      { text: "Отмена", style: "cancel" },
+      {
+        text: "Удалить",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await authRequest(async (token) => {
+              await axios.delete(`https://api.stroydoks.ru/mobile/objects/works/${workId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+            });
+            setWorks((prev) => prev.filter((w) => w.id !== workId));
+          } catch (err) {
+            Alert.alert("Ошибка", "Не удалось удалить работу");
+          }
+        },
+      },
+    ]);
+  };
+
+  const copyWork = async (work: WorkItem) => {
+    try {
+      await authRequest(async (token) => {
+        await axios.post(
+          `https://api.stroydoks.ru/mobile/objects/${objectId}/works`,
+          {
+            title: work.title,
+            unit: work.unit,
+            quantity: work.quantity,
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      });
+      fetchWorks();
+    } catch (err) {
+      Alert.alert("Ошибка", "Не удалось скопировать работу");
+    }
+  };
 
   const addWork = async () => {
     try {
@@ -62,7 +148,6 @@ export default function ObjectDetailsScreen({ route }: Props) {
   };
 
   const toggleAccept = async (workId: number, accepted: boolean) => {
-    console.log("toggleAccept called", workId, accepted);
     try {
       await authRequest(async (token) => {
         console.log("Token:", token);
@@ -117,6 +202,20 @@ export default function ObjectDetailsScreen({ route }: Props) {
             <Text>
               {item.title} ({item.unit}) - {item.quantity}
             </Text>
+            <TouchableOpacity onPress={() => copyWork(item)}>
+              <Copy size={20} color="#000" />
+            </TouchableOpacity>
+            {!item.accepted && (
+              <>
+                <TouchableOpacity onPress={() => openEditModal(item)}>
+                  <Pencil size={20} color="#007AFF" />
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => deleteWork(item.id)}>
+                  <Trash2 size={20} color="#FF3B30" />
+                </TouchableOpacity>
+              </>
+            )}
             {currentUser.role === "foreman" && (
               <Switch value={item.accepted} onValueChange={(val) => toggleAccept(item.id, val)} />
             )}
@@ -125,8 +224,26 @@ export default function ObjectDetailsScreen({ route }: Props) {
       />
 
       {currentUser.role === "foreman" && works.length > 0 && works.every((w) => w.accepted) && (
-        <Button title="Экспортировать отчет" onPress={exportReport} />
+        <Button containerStyle={{ marginBottom: 40 }} title="Экспортировать отчет" onPress={exportReport} />
       )}
+      <Modal visible={editModalVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={{ fontSize: 18, marginBottom: 10 }}>Редактировать работу</Text>
+            <TextInput placeholder="Название" value={editTitle} onChangeText={setEditTitle} style={styles.input} />
+            <TextInput placeholder="Ед. изм." value={editUnit} onChangeText={setEditUnit} style={styles.input} />
+            <TextInput
+              placeholder="Количество"
+              value={editQuantity}
+              onChangeText={setEditQuantity}
+              keyboardType="numeric"
+              style={styles.input}
+            />
+            <Button containerStyle={{ marginBottom: 10 }} title="Сохранить" onPress={saveEdit} />
+            <Button title="Отмена" onPress={() => setEditModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -141,5 +258,21 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderColor: "#eee",
+  },
+  actions: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    width: "80%",
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 12,
   },
 });

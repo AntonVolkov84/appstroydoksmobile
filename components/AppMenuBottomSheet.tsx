@@ -73,8 +73,8 @@ const styles = StyleSheet.create({
   },
   menuText: { fontSize: 28 },
   modal: {
-    justifyContent: "flex-end", // меню снизу
-    margin: 0, // на весь экран
+    justifyContent: "flex-end",
+    margin: 0,
   },
   content: {
     backgroundColor: "#fff",

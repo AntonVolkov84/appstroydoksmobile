@@ -17,10 +17,10 @@ export const useWebSocketObjects = (onNewObject: (obj: WSMessage) => void) => {
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
         if (data.type === "assigned_to_object") {
-          onNewObject(data.object);
+          onNewObject(data);
         }
         if (data.type === "work") {
-          onNewObject(data.object);
+          onNewObject(data);
         }
       };
 
