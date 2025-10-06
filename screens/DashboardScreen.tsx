@@ -32,6 +32,13 @@ export default function DashboardScreen({ route, navigation }: Props) {
         return [...prev, msg.object];
       });
     }
+    if (msg.type === "object-deleted") {
+      if (!msg.object) {
+        fetchObjects();
+        return;
+      }
+      setObjects((prev) => prev.filter((w) => w.id !== msg.object.objectId));
+    }
   });
   const fetchObjects = async () => {
     try {

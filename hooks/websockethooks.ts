@@ -20,7 +20,6 @@ export const useWebSocketObjects = (onNewObject: (obj: WSMessage) => void) => {
         try {
           const data = JSON.parse(event.data);
           if (data.type === "assigned_to_object") {
-            console.log("assigned_to_object", data);
             onNewObject(data);
           }
           if (data.type === "work") {
@@ -30,7 +29,10 @@ export const useWebSocketObjects = (onNewObject: (obj: WSMessage) => void) => {
             onNewObject(data);
           }
           if (data.type === "work-deleted") {
-            console.log(data);
+            onNewObject(data);
+          }
+          if (data.type === "object-deleted") {
+            console.log("ObJ deleted", data);
             onNewObject(data);
           }
         } catch (error) {
