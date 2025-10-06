@@ -47,7 +47,7 @@ export default function AppMenuBottomSheet({
               </TouchableOpacity>
             </>
           )}
-          <TouchableOpacity style={styles.item} onPress={onLogout}>
+          <TouchableOpacity style={[styles.item, { marginBottom: 25 }]} onPress={onLogout}>
             <Text>Выйти</Text>
           </TouchableOpacity>
         </View>

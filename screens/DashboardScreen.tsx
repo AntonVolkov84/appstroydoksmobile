@@ -19,9 +19,18 @@ export default function DashboardScreen({ route, navigation }: Props) {
   const [currentUser, setCurrentUser] = useState(user);
   const [objects, setObjects] = useState<ObjectItemData[]>([]);
 
-  useWebSocketObjects((newObj) => {
-    if ("address" in newObj) {
-      setObjects((prev) => [...prev, newObj]);
+  useWebSocketObjects((msg) => {
+    if (msg.type === "assigned_to_object") {
+      if (!msg.object) {
+        fetchObjects();
+        return;
+      }
+
+      setObjects((prev) => {
+        const exists = prev.some((w) => w.id === msg.object.id);
+        if (exists) return prev;
+        return [...prev, msg.object];
+      });
     }
   });
   const fetchObjects = async () => {

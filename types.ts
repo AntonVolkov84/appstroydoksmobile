@@ -17,10 +17,12 @@ export type ObjectItem = {
   name: string;
   address: string;
 };
+type WorkDeletedMessage = { workId: number };
 export type WSMessage =
   | { type: "assigned_to_object"; object: ObjectItemData }
   | { type: "work"; object: WorkItem }
-  | { type: "work-update"; object: WorkItem };
+  | { type: "work-update"; object: WorkItem }
+  | { type: "work-deleted"; object: WorkDeletedMessage };
 export interface ObjectItemData {
   address: string;
   author_id: number;

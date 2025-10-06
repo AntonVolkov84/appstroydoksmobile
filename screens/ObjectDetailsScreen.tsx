@@ -12,7 +12,7 @@ import { Pencil, Trash2, Copy } from "lucide-react-native";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ObjectDetails">;
 
-export default function ObjectDetailsScreen({ route }: Props) {
+export default function ObjectDetailsScreen({ route, navigation }: Props) {
   const { objectId, currentUser } = route.params;
   const [works, setWorks] = useState<WorkItem[]>([]);
   const [title, setTitle] = useState("");
@@ -87,6 +87,13 @@ export default function ObjectDetailsScreen({ route }: Props) {
     }
     if (msg.type === "work-update") {
       setWorks((prev) => prev.map((w) => (w.id === msg.object.id ? { ...w, ...msg.object } : w)));
+    }
+    if (msg.type === "work-deleted") {
+      if (!msg.object) {
+        fetchWorks();
+        return;
+      }
+      setWorks((prev) => prev.filter((w) => w.id !== msg.object.workId));
     }
   });
 
@@ -232,8 +239,9 @@ export default function ObjectDetailsScreen({ route }: Props) {
       />
 
       {currentUser.role === "foreman" && hasAccepted && (
-        <Button containerStyle={{ marginBottom: 40 }} title="Экспортировать отчет" onPress={exportReport} />
+        <Button containerStyle={{ marginBottom: 20 }} title="Экспортировать отчет" onPress={exportReport} />
       )}
+      <Button containerStyle={{ marginBottom: 50 }} title="Назад" onPress={() => navigation.goBack()} />
       <Modal visible={editModalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -268,7 +276,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderBottomWidth: 1,
     borderColor: "#eee",
-    backgroundColor: "green",
   },
   titleContainer: {
     width: "45%",

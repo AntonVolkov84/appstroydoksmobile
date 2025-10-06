@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "app.stroydoks",
-    "slug": "app.stroydoks",
+    "name": "Stroydoks",
+    "slug": "stroydoks-app",
     "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/LogoBrowserwithoutBG.png",
@@ -21,10 +21,16 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.ant_volkov.stroydoksapp"
     },
     "web": {
       "favicon": "./assets/LogoBrowserwithoutBG.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e01d0a53-5b05-416e-9c73-e9d6eff0d76b"
+      }
     }
   }
 }
