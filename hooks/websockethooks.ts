@@ -22,6 +22,9 @@ export const useWebSocketObjects = (onNewObject: (obj: WSMessage) => void) => {
         if (data.type === "work") {
           onNewObject(data);
         }
+        if (data.type === "work-update") {
+          onNewObject(data);
+        }
       };
 
       ws.onclose = () => console.log("WebSocket disconnected");

@@ -67,12 +67,6 @@ export default function ObjectDetailsScreen({ route }: Props) {
           { headers: { Authorization: `Bearer ${token}` } }
         );
       });
-      setWorks((prev) =>
-        prev.map((w) =>
-          w.id === editWorkItem.id ? { ...w, title: editTitle, unit: editUnit, quantity: Number(editQuantity) } : w
-        )
-      );
-
       setEditModalVisible(false);
     } catch (err) {
       Alert.alert("Ошибка", "Не удалось изменить работу");
@@ -81,11 +75,18 @@ export default function ObjectDetailsScreen({ route }: Props) {
 
   useWebSocketObjects((msg: WSMessage) => {
     if (msg.type === "work") {
+      if (!msg.object) {
+        fetchWorks();
+        return;
+      }
       setWorks((prev) => {
         const exists = prev.some((w) => w.id === msg.object.id);
         if (exists) return prev;
         return [...prev, msg.object];
       });
+    }
+    if (msg.type === "work-update") {
+      setWorks((prev) => prev.map((w) => (w.id === msg.object.id ? { ...w, ...msg.object } : w)));
     }
   });
 
@@ -150,13 +151,11 @@ export default function ObjectDetailsScreen({ route }: Props) {
   const toggleAccept = async (workId: number, accepted: boolean) => {
     try {
       await authRequest(async (token) => {
-        console.log("Token:", token);
         const res = await axios.put(
           `https://api.stroydoks.ru/mobile/objects/works/${workId}/accept`,
           { accepted },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        console.log("Server response:", res.data);
         return res.data;
       });
       setWorks((prev) => prev.map((w) => (w.id === workId ? { ...w, accepted } : w)));
@@ -166,15 +165,22 @@ export default function ObjectDetailsScreen({ route }: Props) {
     }
   };
 
+  const hasAccepted = works.some((w) => w.accepted);
   const exportReport = async () => {
     try {
-      const token = await AsyncStorage.getItem("accessToken");
-      const res = await axios.get(`https://api.stroydoks.ru/mobile/objects/${objectId}/export`, {
-        headers: { Authorization: `Bearer ${token}` },
-        responseType: "blob",
+      await authRequest(async (token) => {
+        const res = await axios.post(
+          `https://api.stroydoks.ru/mobile/objects/${objectId}/export`,
+          {},
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        console.log("Export success:", res.data);
       });
       Alert.alert("Успех", "Отчет выгружен!");
-    } catch (err) {
+    } catch (err: any) {
+      console.error("exportReport error", err);
       Alert.alert("Ошибка", "Не удалось выгрузить отчет");
     }
   };
@@ -199,9 +205,11 @@ export default function ObjectDetailsScreen({ route }: Props) {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.workItem}>
-            <Text>
-              {item.title} ({item.unit}) - {item.quantity}
-            </Text>
+            <View style={styles.titleContainer}>
+              <Text style={styles.titleText}>
+                {item.title} ({item.unit}) - {item.quantity}
+              </Text>
+            </View>
             <TouchableOpacity onPress={() => copyWork(item)}>
               <Copy size={20} color="#000" />
             </TouchableOpacity>
@@ -223,7 +231,7 @@ export default function ObjectDetailsScreen({ route }: Props) {
         )}
       />
 
-      {currentUser.role === "foreman" && works.length > 0 && works.every((w) => w.accepted) && (
+      {currentUser.role === "foreman" && hasAccepted && (
         <Button containerStyle={{ marginBottom: 40 }} title="Экспортировать отчет" onPress={exportReport} />
       )}
       <Modal visible={editModalVisible} transparent animationType="slide">
@@ -255,9 +263,19 @@ const styles = StyleSheet.create({
   workItem: {
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: 10,
+    alignItems: "center",
+    padding: 5,
+    paddingHorizontal: 15,
     borderBottomWidth: 1,
     borderColor: "#eee",
+    backgroundColor: "green",
+  },
+  titleContainer: {
+    width: "45%",
+  },
+  titleText: {
+    fontSize: 20,
+    flexShrink: 1,
   },
   actions: {
     flexDirection: "row",

@@ -35,6 +35,7 @@ export const authRequest = async (makeRequest: (token: string) => Promise<any>) 
       return await makeRequest(newAccessToken);
     }
     if (err.response?.data) {
+      console.log(err.response);
       throw err.response.data;
     }
     throw err;

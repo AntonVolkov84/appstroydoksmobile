@@ -17,7 +17,10 @@ export type ObjectItem = {
   name: string;
   address: string;
 };
-export type WSMessage = { type: "assigned_to_object"; object: ObjectItemData } | { type: "work"; object: WorkItem };
+export type WSMessage =
+  | { type: "assigned_to_object"; object: ObjectItemData }
+  | { type: "work"; object: WorkItem }
+  | { type: "work-update"; object: WorkItem };
 export interface ObjectItemData {
   address: string;
   author_id: number;
