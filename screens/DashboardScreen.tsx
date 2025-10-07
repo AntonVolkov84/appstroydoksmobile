@@ -15,9 +15,10 @@ import { authRequest } from "../api";
 type Props = NativeStackScreenProps<RootStackParamList, "Dashboard">;
 
 export default function DashboardScreen({ route, navigation }: Props) {
-  const { user } = route.params ?? { user: null };
-  const [currentUser, setCurrentUser] = useState(user);
+  // const { user } = route.params ?? { user: null };
+  // const [currentUser, setCurrentUser] = useState(user);
   const [objects, setObjects] = useState<ObjectItemData[]>([]);
+  const { user: currentUser } = route.params ?? { user: null };
 
   useWebSocketObjects((msg) => {
     if (msg.type === "assigned_to_object") {
@@ -42,13 +43,11 @@ export default function DashboardScreen({ route, navigation }: Props) {
   });
   const fetchObjects = async () => {
     try {
-      const token = await AsyncStorage.getItem("accessToken");
-      if (!token) return;
-
-      const res = await axios.get("https://api.stroydoks.ru/mobile/objects", {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await authRequest(async (token) => {
+        return await axios.get("https://api.stroydoks.ru/mobile/objects", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
       });
-
       setObjects(res.data);
     } catch (err) {
       console.error("Failed to fetch objects", err);
@@ -83,10 +82,9 @@ export default function DashboardScreen({ route, navigation }: Props) {
           { headers: { Authorization: `Bearer ${token}` } }
         );
       });
-      setCurrentUser((prev) => ({
-        ...prev,
-        role: res.data.role,
-      }));
+      navigation.setParams({
+        user: { ...currentUser, role: res.data.role },
+      });
     } catch (err) {
       console.error("Failed to toggle role", err);
       Alert.alert("Ошибка", "Не удалось изменить роль. Попробуйте снова.");
@@ -132,7 +130,7 @@ export default function DashboardScreen({ route, navigation }: Props) {
         currentUser={currentUser}
         onLogout={handleLogout}
         onToggleRole={toggleRole}
-        onfinishedWorks={() => console.log("1")}
+        onfinishedWorks={() => navigation.navigate("FinishedWorks", { currentUser })}
         onManageObjects={() => navigation.navigate("Objects")}
         onManageWorkers={() => navigation.navigate("Workers")}
       />

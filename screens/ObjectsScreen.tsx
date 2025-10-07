@@ -104,14 +104,13 @@ export default function ObjectsScreen({ navigation }: ObjectScreenProps) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: "#f9f9f9", paddingTop: 50 },
-  title: { fontSize: 22, fontWeight: "700", marginBottom: 20, textAlign: "center", maxWidth: "70%" },
+  title: { fontSize: 22, fontWeight: "700", marginBottom: 20, maxWidth: "100%" },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 8,
     padding: 10,
     marginBottom: 10,
-    backgroundColor: "#fff",
   },
   addButton: {
     backgroundColor: "#007AFF",

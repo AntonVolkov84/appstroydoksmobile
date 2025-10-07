@@ -10,6 +10,7 @@ import ObjectsScreen from "./screens/ObjectsScreen";
 import WorkersScreen from "./screens/WorkersScreen";
 import ObjectWorkersScreen from "./screens/ObjectWorkersScreen";
 import ObjectDetailsScreen from "./screens/ObjectDetailsScreen";
+import { FinishedWorksScreen } from "./screens/FinishedWorksScreen";
 
 export type RootStackParamList = {
   Login: undefined;
@@ -20,6 +21,7 @@ export type RootStackParamList = {
   ObjectWorkers: { objectId: number; object: ObjectItemData };
   Workers: undefined;
   ObjectDetails: { objectId: number; currentUser: User };
+  FinishedWorks: { currentUser: User };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -46,6 +48,11 @@ export default function App() {
         <Stack.Screen
           name="ObjectDetails"
           component={ObjectDetailsScreen}
+          options={{ headerShown: false, animation: "none" }}
+        />
+        <Stack.Screen
+          name="FinishedWorks"
+          component={FinishedWorksScreen}
           options={{ headerShown: false, animation: "none" }}
         />
       </Stack.Navigator>

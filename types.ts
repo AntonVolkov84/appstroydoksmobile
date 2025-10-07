@@ -41,3 +41,16 @@ export interface WorkItem {
   accepted: boolean;
   createdBy: number;
 }
+export type FinishedWork = {
+  id: number;
+  object_id: number;
+  worker_id: number;
+  title: string;
+  unit: string;
+  quantity: number;
+  accepted: boolean;
+  confirmed_at: string;
+  worker_name: string;
+  worker_surname: string;
+  worker_username: string;
+};
