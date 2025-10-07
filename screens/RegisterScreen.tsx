@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Alert, StyleSheet } from "react-native";
+import { View, Text, TextInput, Image, Alert, StyleSheet } from "react-native";
 import axios from "axios";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
 import Button from "../components/Button";
+import Logo from "../assets/LogoBrowserwithoutBG.png";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Register">;
 
@@ -33,6 +34,8 @@ export default function RegisterScreen({ navigation }: Props) {
 
   return (
     <View style={styles.container}>
+      <Image style={styles.image} source={Logo}></Image>
+      <Text style={styles.titleName}>Stroydoks</Text>
       <Text style={styles.title}>Регистрация</Text>
       <TextInput placeholder="Логин" style={styles.input} value={username} onChangeText={setUsername} />
       <TextInput placeholder="Имя" style={styles.input} value={name} onChangeText={setName} />
@@ -45,14 +48,20 @@ export default function RegisterScreen({ navigation }: Props) {
         value={password}
         onChangeText={setPassword}
       />
-      <Button title="Зарегистрироваться" containerStyle={{ marginTop: 70 }} onPress={handleRegister} />
-      <Button title="Логин" containerStyle={{ marginTop: 5 }} onPress={() => navigation.navigate("Login")} />
+      <Button title="Зарегистрироваться" containerStyle={{ marginTop: 40 }} onPress={handleRegister} />
+      <Button title="Логин" containerStyle={{ marginTop: 15 }} onPress={() => navigation.navigate("Login")} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f2f2f2", padding: 20 },
+  container: {
+    flex: 1,
+    marginTop: 50,
+    alignItems: "center",
+    backgroundColor: "#f2f2f2",
+    padding: 20,
+  },
   card: {
     width: "100%",
     backgroundColor: "#fff",
@@ -69,5 +78,13 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     borderRadius: 8,
     fontSize: 16,
+  },
+  image: {
+    width: 100,
+    height: 100,
+    objectFit: "contain",
+  },
+  titleName: {
+    fontSize: 30,
   },
 });

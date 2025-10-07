@@ -132,6 +132,7 @@ export default function DashboardScreen({ route, navigation }: Props) {
         currentUser={currentUser}
         onLogout={handleLogout}
         onToggleRole={toggleRole}
+        onfinishedWorks={() => console.log("1")}
         onManageObjects={() => navigation.navigate("Objects")}
         onManageWorkers={() => navigation.navigate("Workers")}
       />

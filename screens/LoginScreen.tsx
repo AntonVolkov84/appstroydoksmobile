@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Alert, StyleSheet } from "react-native";
+import { View, Text, TextInput, Image, Alert, StyleSheet } from "react-native";
 import axios from "axios";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Button from "../components/Button";
+import Logo from "../assets/LogoBrowserwithoutBG.png";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
@@ -35,6 +36,8 @@ export default function LoginScreen({ navigation }: Props) {
 
   return (
     <View style={styles.container}>
+      <Image style={styles.image} source={Logo}></Image>
+      <Text style={styles.titleName}>Stroydoks</Text>
       <Text style={styles.title}>Вход</Text>
       <TextInput placeholder="Email" style={styles.input} value={email} onChangeText={setEmail} />
       <TextInput
@@ -44,14 +47,20 @@ export default function LoginScreen({ navigation }: Props) {
         value={password}
         onChangeText={setPassword}
       />
-      <Button title="Войти" containerStyle={{ marginTop: 70 }} onPress={handleLogin} />
-      <Button title="Регистрация" containerStyle={{ marginTop: 10 }} onPress={() => navigation.navigate("Register")} />
+      <Button title="Войти" containerStyle={{ marginTop: 40 }} onPress={handleLogin} />
+      <Button title="Регистрация" containerStyle={{ marginTop: 15 }} onPress={() => navigation.navigate("Register")} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f2f2f2", padding: 20 },
+  container: {
+    flex: 1,
+    marginTop: 80,
+    alignItems: "center",
+    backgroundColor: "#f2f2f2",
+    padding: 20,
+  },
   card: {
     width: "100%",
     backgroundColor: "#fff",
@@ -68,5 +77,13 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     borderRadius: 8,
     fontSize: 16,
+  },
+  image: {
+    width: 100,
+    height: 100,
+    objectFit: "contain",
+  },
+  titleName: {
+    fontSize: 30,
   },
 });

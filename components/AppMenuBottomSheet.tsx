@@ -9,6 +9,7 @@ type AppMenuBottomSheetProps = {
   onToggleRole: () => void;
   onManageObjects: () => void;
   onManageWorkers: () => void;
+  onfinishedWorks: () => void;
   currentUser: User;
 };
 
@@ -19,6 +20,7 @@ export default function AppMenuBottomSheet({
   onToggleRole,
   onManageObjects,
   onManageWorkers,
+  onfinishedWorks,
 }: AppMenuBottomSheetProps) {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -45,9 +47,12 @@ export default function AppMenuBottomSheet({
               <TouchableOpacity style={styles.item} onPress={onManageWorkers}>
                 <Text>Управление рабочими</Text>
               </TouchableOpacity>
+              <TouchableOpacity style={styles.item} onPress={onfinishedWorks}>
+                <Text>Завершенные работы</Text>
+              </TouchableOpacity>
             </>
           )}
-          <TouchableOpacity style={[styles.item, { marginBottom: 25 }]} onPress={onLogout}>
+          <TouchableOpacity style={[styles.item, { marginBottom: 30 }]} onPress={onLogout}>
             <Text>Выйти</Text>
           </TouchableOpacity>
         </View>
