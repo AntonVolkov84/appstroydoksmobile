@@ -105,26 +105,30 @@ export default function DashboardScreen({ route, navigation }: Props) {
         numColumns={2}
         columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 10 }}
         contentContainerStyle={{ paddingHorizontal: 10, paddingVertical: 10 }}
-        renderItem={({ item, index }) => (
-          <LinearGradient
-            colors={["#6b73ff", "#000dff"]}
-            start={[0, 0]}
-            end={[1, 1]}
-            style={{
-              width: objects.length === 1 ? "100%" : "45%",
-              borderRadius: 12,
-              padding: 15,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={{ width: objects.length === 1 ? "100%" : "45%" }}
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate("ObjectDetails", { currentUser, objectId: item.id })}
           >
-            <TouchableOpacity onPress={() => navigation.navigate("ObjectDetails", { currentUser, objectId: item.id })}>
+            <LinearGradient
+              colors={["#6b73ff", "#000dff"]}
+              start={[0, 0]}
+              end={[1, 1]}
+              style={{
+                borderRadius: 12,
+                padding: 15,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
               <Text style={styles.objectTitle}>{item.title}</Text>
               <Text style={styles.objectAddress}>{item.address}</Text>
-            </TouchableOpacity>
-          </LinearGradient>
+            </LinearGradient>
+          </TouchableOpacity>
         )}
       />
+
       <AppMenuBottomSheet
         role={currentUser.role}
         currentUser={currentUser}
