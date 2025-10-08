@@ -147,72 +147,103 @@ export const FinishedWorksScreen = ({ navigation, route }: FinishedWorksProps) =
       Alert.alert("Ошибка", "Не удалось сохранить ведомость");
     }
   };
-  console.log(selectedDate);
+
   return (
     <View style={styles.container}>
-      <Button
-        textStyle={{ fontSize: 16, marginBottom: 8 }}
-        title={selectedObject ? selectedObject.title : "Выберите объект"}
-        onPress={() => setModalVisibleObjects(true)}
-        containerStyle={{ marginTop: 2, marginBottom: 8 }}
-      />
-      <ScrollView horizontal contentContainerStyle={{ marginBottom: 8 }}>
+      <View style={styles.filtersContainer}>
         <Button
-          containerStyle={{
-            backgroundColor: !selectedWorker ? "#ff001e" : "#007AFF",
-          }}
-          title="Все рабочие"
-          onPress={() => setSelectedWorker(null)}
+          textStyle={{ fontSize: 20 }}
+          title={selectedObject ? selectedObject.title : "Выберите объект"}
+          onPress={() => setModalVisibleObjects(true)}
+          containerStyle={{ marginTop: 2, marginBottom: 8 }}
         />
-        {uniqueWorkers.map((w) => (
+
+        <ScrollView horizontal contentContainerStyle={styles.horizontalScroll} showsHorizontalScrollIndicator={false}>
+          <Button
+            containerStyle={{
+              backgroundColor: !selectedWorker ? "#ff001e" : "#007AFF",
+              height: 40,
+              alignItems: "center",
+              justifyContent: "center",
+              paddingVertical: 5,
+            }}
+            title="Все рабочие"
+            onPress={() => setSelectedWorker(null)}
+          />
+          {uniqueWorkers.map((w) => (
+            <Button
+              key={w.id}
+              containerStyle={{
+                marginLeft: 8,
+                backgroundColor: selectedWorker === w.id ? "#ff001e" : "#007AFF",
+                height: 40,
+                alignItems: "center",
+                justifyContent: "center",
+                paddingVertical: 5,
+              }}
+              title={w.name}
+              onPress={() => setSelectedWorker(w.id)}
+            />
+          ))}
           <Button
             containerStyle={{
               marginLeft: 8,
-              backgroundColor: selectedWorker === w.id ? "#ff001e" : "#007AFF",
+              height: 40,
+              alignItems: "center",
+              justifyContent: "center",
+              paddingVertical: 5,
+              backgroundColor: !selectedDate ? "#ff001e" : "#007AFF",
             }}
-            key={w.id}
-            title={w.name}
-            onPress={() => setSelectedWorker(w.id)}
+            title="Все даты"
+            onPress={() => setSelectedDate(null)}
           />
-        ))}
-        <Button
-          containerStyle={{ marginLeft: 8, backgroundColor: !selectedDate ? "#ff001e" : "#007AFF" }}
-          title="Все даты"
-          onPress={() => setSelectedDate(null)}
-        />
-        {uniqueDates.map((d) => (
-          <Button
-            containerStyle={{ marginLeft: 8, backgroundColor: selectedDate === d ? "#ff001e" : "#007AFF" }}
-            key={d}
-            title={d}
-            onPress={() => setSelectedDate(d)}
-          />
-        ))}
-      </ScrollView>
-      <View style={{ flexDirection: "row", justifyContent: "space-around", marginBottom: 8 }}>
-        <Button title="По рабочему" onPress={() => setSortField("worker")} />
-        <Button title="По дате" onPress={() => setSortField("date")} />
+          {uniqueDates.map((d) => (
+            <Button
+              key={d}
+              containerStyle={{
+                marginLeft: 8,
+                height: 40,
+                alignItems: "center",
+                justifyContent: "center",
+                paddingVertical: 5,
+                backgroundColor: selectedDate === d ? "#ff001e" : "#007AFF",
+              }}
+              title={d}
+              onPress={() => setSelectedDate(d)}
+            />
+          ))}
+        </ScrollView>
+
+        <View style={styles.sortButtons}>
+          <Button containerStyle={styles.sortButton} title="По рабочему" onPress={() => setSortField("worker")} />
+          <Button containerStyle={styles.sortButton} title="По дате" onPress={() => setSortField("date")} />
+        </View>
       </View>
-      {loading ? (
-        <ActivityIndicator size="large" />
-      ) : (
-        <FlatList
-          data={sortedWorks}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.workCard}>
-              <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.details}>
-                Кол-во: {item.quantity} {item.unit}
-              </Text>
-              <Text style={styles.details}>
-                Рабочий: {item.worker_surname} {item.worker_name}
-              </Text>
-              <Text style={styles.details}>Подтверждена: {new Date(item.confirmed_at).toLocaleString()}</Text>
-            </View>
-          )}
+      <FlatList
+        style={styles.list}
+        data={sortedWorks}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.workCard}>
+            <Text style={styles.title}>{item.title}</Text>
+            <Text style={styles.details}>
+              Кол-во: {item.quantity} {item.unit}
+            </Text>
+            <Text style={styles.details}>
+              Рабочий: {item.worker_surname} {item.worker_name}
+            </Text>
+            <Text style={styles.details}>Подтверждена: {new Date(item.confirmed_at).toLocaleString()}</Text>
+          </View>
+        )}
+      />
+      <View style={styles.bottomButtons}>
+        <Button
+          containerStyle={{ marginBottom: 8 }}
+          title="Отправить на сайт в форму"
+          onPress={() => exportInBilOfQuantities()}
         />
-      )}
+        <Button containerStyle={{ marginBottom: 30 }} title="Назад" onPress={() => navigation.goBack()} />
+      </View>
       <Modal visible={modalVisibleObjects} animationType="slide">
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>Выберите объект</Text>
@@ -231,23 +262,39 @@ export const FinishedWorksScreen = ({ navigation, route }: FinishedWorksProps) =
               </TouchableOpacity>
             )}
           />
-          <Button title="Закрыть" onPress={() => setModalVisibleObjects(false)} />
+          <Button containerStyle={{ marginBottom: 40 }} title="Закрыть" onPress={() => setModalVisibleObjects(false)} />
         </View>
       </Modal>
-      <Button
-        containerStyle={{ marginBottom: 8 }}
-        title="Отправить на сайт в форму"
-        onPress={() => exportInBilOfQuantities()}
-      />
-      <Button containerStyle={{ marginBottom: 40 }} title="Назад" onPress={() => navigation.goBack()} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     paddingHorizontal: 10,
     paddingTop: 50,
+  },
+  filtersContainer: {
+    marginBottom: 8,
+  },
+  horizontalScroll: {
+    alignItems: "center",
+    height: 42,
+    marginBottom: 8,
+  },
+  sortButtons: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+  },
+  sortButton: {
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 5,
+  },
+  list: {
+    flex: 1,
   },
   workCard: {
     padding: 12,
@@ -271,8 +318,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#555",
   },
+  bottomButtons: {
+    paddingVertical: 8,
+    marginBottom: 40,
+  },
   modalContainer: {
     flex: 1,
+    paddingTop: 40,
     padding: 16,
     backgroundColor: "#f7f7f7",
   },
