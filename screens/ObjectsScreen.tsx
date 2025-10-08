@@ -61,7 +61,7 @@ export default function ObjectsScreen({ navigation }: ObjectScreenProps) {
             setObjects((prev) => prev.filter((obj) => obj.id !== id));
           } catch (err) {
             console.error("Ошибка удаления объекта", err);
-            Alert.alert("Ошибка", "Не удалось удалить объект");
+            Alert.alert("Ошибка", "Не удалось удалить объект, возможно, есть несохраненные работы");
           }
         },
       },
@@ -86,6 +86,7 @@ export default function ObjectsScreen({ navigation }: ObjectScreenProps) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Объекты</Text>
+      <Text style={styles.info}>Выберите объект для добавления на него рабочего</Text>
       <TextInput style={styles.input} placeholder="Название объекта" value={newName} onChangeText={setNewName} />
       <TextInput style={styles.input} placeholder="Адрес объекта" value={newAddress} onChangeText={setNewAddress} />
       <TouchableOpacity style={styles.addButton} onPress={addObject}>
@@ -104,7 +105,8 @@ export default function ObjectsScreen({ navigation }: ObjectScreenProps) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: "#f9f9f9", paddingTop: 50 },
-  title: { fontSize: 22, fontWeight: "700", marginBottom: 20, maxWidth: "100%" },
+  title: { fontSize: 22, fontWeight: "700", marginBottom: 8, maxWidth: "100%" },
+  info: { fontSize: 16, fontWeight: "400", marginBottom: 8, maxWidth: "100%" },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",

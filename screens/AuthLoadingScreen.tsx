@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
+import { authRequest } from "../api";
 
 type Props = NativeStackScreenProps<RootStackParamList, "AuthLoading">;
 
@@ -17,11 +18,13 @@ export default function AuthLoading({ navigation }: Props) {
           navigation.replace("Login");
           return;
         }
-        const res = await axios.get("https://api.stroydoks.ru/mobile/me", {
-          headers: { Authorization: `Bearer ${accessToken}` },
+        const res = await authRequest(async (token) => {
+          return axios.get("https://api.stroydoks.ru/mobile/me", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
         });
-        const user = res.data;
 
+        const user = res.data;
         if (!user.emailconfirmed) {
           navigation.replace("Login");
           return;
