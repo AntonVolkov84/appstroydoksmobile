@@ -206,38 +206,62 @@ export default function ObjectDetailsScreen({ route, navigation }: Props) {
         />
         <Button title="Добавить" onPress={addWork} />
       </View>
-
+      <View style={styles.tableHeader}>
+        <Text style={[styles.cell, styles.colTitle]}>Название</Text>
+        <Text style={[styles.cell, styles.colUnit]}>Ед.</Text>
+        <Text style={[styles.cell, styles.colQty]}>Кол-во</Text>
+        <Text style={[styles.cell, styles.colActions]}>Действия</Text>
+      </View>
       <FlatList
         data={works}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <View style={styles.workItem}>
-            <View style={styles.titleContainer}>
-              <Text style={styles.titleText}>
-                {item.title} ({item.unit}) - {item.quantity}
-              </Text>
-            </View>
-            <TouchableOpacity onPress={() => copyWork(item)}>
-              <Copy size={20} color="#000" />
-            </TouchableOpacity>
-            {!item.accepted && (
-              <>
-                <TouchableOpacity onPress={() => openEditModal(item)}>
-                  <Pencil size={20} color="#007AFF" />
-                </TouchableOpacity>
+          <View style={styles.tableRow}>
+            <Text style={[styles.cell, styles.colTitle]} numberOfLines={2}>
+              {item.title}
+            </Text>
+            <Text style={[styles.cell, styles.colUnit]}>{item.unit}</Text>
+            <Text style={[styles.cell, styles.colQty]}>{item.quantity}</Text>
 
-                <TouchableOpacity onPress={() => deleteWork(item.id)}>
-                  <Trash2 size={20} color="#FF3B30" />
-                </TouchableOpacity>
-              </>
-            )}
-            {currentUser.role === "foreman" && (
-              <Switch value={item.accepted} onValueChange={(val) => toggleAccept(item.id, val)} />
-            )}
+            <View style={[styles.cell, styles.colActions, { flexDirection: "row", justifyContent: "center", gap: 8 }]}>
+              <TouchableOpacity
+                style={[styles.actionButton, { backgroundColor: "#007AFF" }]}
+                onPress={() => copyWork(item)}
+              >
+                <Copy size={16} color="#fff" />
+              </TouchableOpacity>
+
+              {!item.accepted && (
+                <>
+                  <TouchableOpacity
+                    style={[styles.actionButton, { backgroundColor: "#ff9f0a" }]}
+                    onPress={() => openEditModal(item)}
+                  >
+                    <Pencil size={16} color="#fff" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.actionButton, { backgroundColor: "#ff3b30" }]}
+                    onPress={() => deleteWork(item.id)}
+                  >
+                    <Trash2 size={16} color="#fff" />
+                  </TouchableOpacity>
+                </>
+              )}
+
+              {currentUser.role === "foreman" && (
+                <Switch
+                  value={item.accepted}
+                  onValueChange={(val) => toggleAccept(item.id, val)}
+                  style={{ transform: [{ scale: 0.8 }] }}
+                />
+              )}
+            </View>
           </View>
         )}
+        ListEmptyComponent={
+          <Text style={{ textAlign: "center", marginTop: 40, color: "#888" }}>Работы пока не добавлены</Text>
+        }
       />
-
       {currentUser.role === "foreman" && hasAccepted && (
         <Button containerStyle={{ marginBottom: 20 }} title="Экспортировать отчет" onPress={exportReport} />
       )}
@@ -299,5 +323,39 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 20,
     borderRadius: 12,
+  },
+  tableHeader: {
+    flexDirection: "row",
+    backgroundColor: "#f0f0f0",
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+    marginTop: 20,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+  },
+  tableRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderColor: "#eee",
+    elevation: 1,
+  },
+  cell: {
+    paddingHorizontal: 6,
+    textAlignVertical: "center",
+  },
+  colTitle: { flex: 1.6, fontSize: 15 },
+  colUnit: { flex: 0.4, textAlign: "center", fontSize: 14, color: "#444" },
+  colQty: { flex: 0.8, textAlign: "center", fontSize: 15, fontWeight: "500" },
+  colActions: { flex: 2.2, alignItems: "center", textAlign: "center" },
+  actionButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
