@@ -17,7 +17,7 @@ export type RootStackParamList = {
   Register: undefined;
   AuthLoading: undefined;
   Dashboard: { user: User };
-  Objects: undefined;
+  Objects: { currentUser: User };
   ObjectWorkers: { objectId: number; object: ObjectItemData };
   Workers: undefined;
   ObjectDetails: { objectId: number; currentUser: User };

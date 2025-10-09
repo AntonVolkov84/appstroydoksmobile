@@ -2,18 +2,18 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, Alert } from "react-native";
 import axios from "axios";
 import Button from "../components/Button";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
-import { ObjectItem, ObjectItemData } from "../types";
+import { ObjectItemData, FinishedWork } from "../types";
 import api, { authRequest } from "../api";
 
 type ObjectScreenProps = NativeStackScreenProps<RootStackParamList, "Objects">;
 
-export default function ObjectsScreen({ navigation }: ObjectScreenProps) {
+export default function ObjectsScreen({ navigation, route }: ObjectScreenProps) {
   const [objects, setObjects] = useState<ObjectItemData[]>([]);
   const [newName, setNewName] = useState("");
   const [newAddress, setNewAddress] = useState("");
+  const { currentUser } = route.params ?? { currentUser: null };
 
   useEffect(() => {
     fetchObjects();
@@ -48,26 +48,95 @@ export default function ObjectsScreen({ navigation }: ObjectScreenProps) {
   };
 
   const deleteObject = (id: number, title: string) => {
-    Alert.alert("Удалить объект", `Вы уверены, что хотите удалить объект "${title}"?`, [
-      { text: "Отмена", style: "cancel" },
-      {
-        text: "Удалить",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await authRequest((token) =>
-              api.delete(`/objects/${id}`, { headers: { Authorization: `Bearer ${token}` } })
-            );
-            setObjects((prev) => prev.filter((obj) => obj.id !== id));
-          } catch (err) {
-            console.error("Ошибка удаления объекта", err);
-            Alert.alert("Ошибка", "Не удалось удалить объект, возможно, есть несохраненные работы");
-          }
+    Alert.alert(
+      "Удалить объект",
+      `Вы уверены, что хотите удалить объект "${title}"?\n\nВсе данные и отчёты по нему будут удалены.`,
+      [
+        { text: "Отмена", style: "cancel" },
+        {
+          text: "Удалить",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const pendingRes = await authRequest((token) =>
+                api.get(`/objects/${id}/pending-check`, {
+                  headers: { Authorization: `Bearer ${token}` },
+                })
+              );
+              const pending = pendingRes.data;
+              if (pending.hasPending) {
+                Alert.alert("Ошибка", "Нельзя удалить объект, есть непринятые работы");
+                return;
+              }
+              await authRequest((token) =>
+                api.post(`/objects/${id}/export-check`, {}, { headers: { Authorization: `Bearer ${token}` } })
+              );
+              const finishedWorksRes = await authRequest(async (token) => {
+                return await axios.get(`https://api.stroydoks.ru/mobile/objects/${id}/finished-works`, {
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+              });
+              const allFinishedWorksByObject = finishedWorksRes.data;
+              if (allFinishedWorksByObject.length > 0) exportInBilOfQuantities(allFinishedWorksByObject, id, title);
+
+              await authRequest((token) =>
+                api.delete(`/objects/finished-works/${id}`, {
+                  headers: { Authorization: `Bearer ${token}` },
+                })
+              );
+              await authRequest((token) =>
+                api.delete(`/objects/${id}`, {
+                  headers: { Authorization: `Bearer ${token}` },
+                })
+              );
+              setObjects((prev) => prev.filter((obj) => obj.id !== id));
+              Alert.alert("Готово", `Объект "${title}" успешно удалён`);
+            } catch (err) {
+              console.error("Ошибка удаления объекта", err);
+              Alert.alert("Ошибка", "Не удалось удалить объект. Проверьте состояние данных.");
+            }
+          },
         },
-      },
-    ]);
+      ]
+    );
   };
 
+  const exportInBilOfQuantities = async (allFinishedWorksByObject: FinishedWork[], id: number, title: string) => {
+    try {
+      if (!currentUser?.id) {
+        Alert.alert("Ошибка", "Не удалось определить пользователя");
+        return;
+      }
+      if (!id) {
+        Alert.alert("Ошибка", "Выберите объект перед экспортом");
+        return;
+      }
+      const titleFinishedWorks = `${title} — За все время по объекту`;
+
+      const rows = allFinishedWorksByObject.map((w) => ({
+        name: w.title,
+        unit: w.unit,
+        quantity: String(w.quantity),
+      }));
+
+      await authRequest(async (token) => {
+        await axios.post(
+          "https://api.stroydoks.ru/mobile/savebillbook",
+          {
+            userId: currentUser.id,
+            title: titleFinishedWorks,
+            rows,
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+      });
+    } catch (err) {
+      console.log("exportInBilOfQuantities", err);
+      Alert.alert("Ошибка", "Не удалось сохранить ведомость");
+    }
+  };
   const renderItem = ({ item }: { item: ObjectItemData }) => (
     <TouchableOpacity
       style={styles.item}
