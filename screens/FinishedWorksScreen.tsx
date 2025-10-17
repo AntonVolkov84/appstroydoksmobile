@@ -27,8 +27,6 @@ export const FinishedWorksScreen = ({ navigation, route }: FinishedWorksProps) =
   const [selectedWorker, setSelectedWorker] = useState<number | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [modalVisibleObjects, setModalVisibleObjects] = useState(false);
-  // const [modalVisibleWorkers, setModalVisibleWorkers] = useState(false);
-  // const [modalVisibleDates, setModalVisibleDates] = useState(false);
   const [loading, setLoading] = useState(false);
   const { currentUser } = route.params ?? { currentUser: null };
 
@@ -79,13 +77,13 @@ export const FinishedWorksScreen = ({ navigation, route }: FinishedWorksProps) =
     new Map(works.map((w) => [w.worker_id, { id: w.worker_id, name: `${w.worker_surname} ${w.worker_name}` }])).values()
   );
 
-  const uniqueDates = Array.from(new Set(works.map((w) => new Date(w.confirmed_at).toDateString()))).sort(
+  const uniqueDates = Array.from(new Set(works.map((w) => new Date(w.confirmed_at).toLocaleDateString("ru-RU")))).sort(
     (a, b) => new Date(b).getTime() - new Date(a).getTime()
   );
 
   const filteredWorks = works.filter((w) => {
     const workerMatch = selectedWorker ? w.worker_id === selectedWorker : true;
-    const dateMatch = selectedDate ? new Date(w.confirmed_at).toDateString() === selectedDate : true;
+    const dateMatch = selectedDate ? new Date(w.confirmed_at).toLocaleDateString("ru-RU") === selectedDate : true;
     return workerMatch && dateMatch;
   });
 
@@ -118,7 +116,7 @@ export const FinishedWorksScreen = ({ navigation, route }: FinishedWorksProps) =
       }
 
       const workerInfo = selectedWorker ? uniqueWorkers.find((w) => w.id === selectedWorker)?.name : "все рабочие";
-      const formattedDate = selectedDate ? new Date(selectedDate).toLocaleDateString("ru-RU") : "все даты";
+      const formattedDate = selectedDate ? selectedDate : "все даты";
       const title = `${selectedObject.title} — ${workerInfo}, ${formattedDate}`;
 
       const rows = filteredWorks.map((w) => ({

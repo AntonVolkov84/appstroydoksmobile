@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "./screens/LoginScreen";
@@ -11,6 +11,7 @@ import WorkersScreen from "./screens/WorkersScreen";
 import ObjectWorkersScreen from "./screens/ObjectWorkersScreen";
 import ObjectDetailsScreen from "./screens/ObjectDetailsScreen";
 import { FinishedWorksScreen } from "./screens/FinishedWorksScreen";
+import { StatusBar } from "expo-status-bar";
 
 export type RootStackParamList = {
   Login: undefined;
@@ -29,6 +30,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function App() {
   return (
     <NavigationContainer>
+      <StatusBar style="dark" />
       <Stack.Navigator initialRouteName="AuthLoading">
         <Stack.Screen name="AuthLoading" component={AuthLoading} options={{ headerShown: false, animation: "none" }} />
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false, animation: "none" }} />

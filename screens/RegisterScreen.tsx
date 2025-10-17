@@ -21,7 +21,7 @@ export default function RegisterScreen({ navigation }: Props) {
         username,
         name,
         surname,
-        email,
+        email: email.toLocaleLowerCase(),
         password,
       });
       Alert.alert("Успех", "Регистрация завершена. Проверьте почту и подтвердите email.", [
@@ -40,7 +40,7 @@ export default function RegisterScreen({ navigation }: Props) {
       <TextInput placeholder="Логин" style={styles.input} value={username} onChangeText={setUsername} />
       <TextInput placeholder="Имя" style={styles.input} value={name} onChangeText={setName} />
       <TextInput placeholder="Фамилия" style={styles.input} value={surname} onChangeText={setSurname} />
-      <TextInput placeholder="Email" style={styles.input} value={email} onChangeText={setEmail} />
+      <TextInput placeholder="Email" style={styles.input} value={email.toLocaleLowerCase()} onChangeText={setEmail} />
       <TextInput
         placeholder="Пароль"
         style={styles.input}
