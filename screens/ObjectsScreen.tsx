@@ -138,10 +138,7 @@ export default function ObjectsScreen({ navigation, route }: ObjectScreenProps) 
     }
   };
   const renderItem = ({ item }: { item: ObjectItemData }) => (
-    <TouchableOpacity
-      style={styles.item}
-      onPress={() => navigation.replace("ObjectWorkers", { objectId: item.id, object: item })}
-    >
+    <View style={styles.item}>
       <View>
         <Text style={styles.name}>{item.title}</Text>
         <Text style={styles.address}>{item.address}</Text>
@@ -149,13 +146,12 @@ export default function ObjectsScreen({ navigation, route }: ObjectScreenProps) 
       <TouchableOpacity style={styles.deleteButton} onPress={() => deleteObject(item.id, item.title)}>
         <Text style={{ color: "#fff" }}>Удалить</Text>
       </TouchableOpacity>
-    </TouchableOpacity>
+    </View>
   );
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Объекты</Text>
-      <Text style={styles.info}>Выберите объект для добавления на него рабочего</Text>
       <TextInput style={styles.input} placeholder="Название объекта" value={newName} onChangeText={setNewName} />
       <TextInput style={styles.input} placeholder="Адрес объекта" value={newAddress} onChangeText={setNewAddress} />
       <TouchableOpacity style={styles.addButton} onPress={addObject}>
@@ -173,7 +169,7 @@ export default function ObjectsScreen({ navigation, route }: ObjectScreenProps) 
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#f9f9f9", paddingTop: 50 },
+  container: { flex: 1, padding: 20, backgroundColor: "#f2f2f2", paddingTop: 50 },
   title: { fontSize: 22, fontWeight: "700", marginBottom: 8, maxWidth: "100%" },
   info: { fontSize: 16, fontWeight: "400", marginBottom: 8, maxWidth: "100%" },
   input: {

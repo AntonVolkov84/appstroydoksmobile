@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Image, Alert, StyleSheet } from "react-native";
+import { View, Text, TextInput, Image, Alert, StyleSheet, TouchableOpacity } from "react-native";
 import axios from "axios";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
@@ -12,6 +12,7 @@ type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 export default function LoginScreen({ navigation }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const saveTokens = async (accessToken: string, refreshToken: string) => {
     await AsyncStorage.setItem("accessToken", accessToken);
     await AsyncStorage.setItem("refreshToken", refreshToken);
@@ -40,13 +41,18 @@ export default function LoginScreen({ navigation }: Props) {
       <Text style={styles.titleName}>Stroydoks</Text>
       <Text style={styles.title}>Вход</Text>
       <TextInput placeholder="Email" style={styles.input} value={email} onChangeText={setEmail} />
-      <TextInput
-        placeholder="Пароль"
-        style={styles.input}
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
+      <View style={styles.passwordContainer}>
+        <TextInput
+          placeholder="Пароль"
+          // style={[styles.input, { flex: 1, marginVertical: 0 }]}
+          secureTextEntry={!showPassword}
+          value={password}
+          onChangeText={setPassword}
+        />
+        <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeButton}>
+          <Text style={{ fontSize: 16 }}>{showPassword ? "🙈" : "👁️"}</Text>
+        </TouchableOpacity>
+      </View>
       <Button title="Войти" containerStyle={{ marginTop: 40 }} onPress={handleLogin} />
       <Button title="Регистрация" containerStyle={{ marginTop: 15 }} onPress={() => navigation.navigate("Register")} />
     </View>
@@ -85,5 +91,20 @@ const styles = StyleSheet.create({
   },
   titleName: {
     fontSize: 30,
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    width: 200,
+    marginVertical: 8,
+    backgroundColor: "#fff",
+    justifyContent: "space-between",
+  },
+  eyeButton: {
+    marginLeft: 8,
   },
 });

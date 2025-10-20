@@ -8,7 +8,6 @@ import AuthLoading from "./screens/AuthLoadingScreen";
 import { User, ObjectItemData } from "./types";
 import ObjectsScreen from "./screens/ObjectsScreen";
 import WorkersScreen from "./screens/WorkersScreen";
-import ObjectWorkersScreen from "./screens/ObjectWorkersScreen";
 import ObjectDetailsScreen from "./screens/ObjectDetailsScreen";
 import { FinishedWorksScreen } from "./screens/FinishedWorksScreen";
 import { StatusBar } from "expo-status-bar";
@@ -19,9 +18,8 @@ export type RootStackParamList = {
   AuthLoading: undefined;
   Dashboard: { user: User };
   Objects: { currentUser: User };
-  ObjectWorkers: { objectId: number; object: ObjectItemData };
   Workers: undefined;
-  ObjectDetails: { objectId: number; currentUser: User };
+  ObjectDetails: { currentUser: User };
   FinishedWorks: { currentUser: User };
 };
 
@@ -42,11 +40,6 @@ export default function App() {
         />
         <Stack.Screen name="Objects" component={ObjectsScreen} options={{ headerShown: false, animation: "none" }} />
         <Stack.Screen name="Workers" component={WorkersScreen} options={{ headerShown: false, animation: "none" }} />
-        <Stack.Screen
-          name="ObjectWorkers"
-          component={ObjectWorkersScreen}
-          options={{ headerShown: false, animation: "none" }}
-        />
         <Stack.Screen
           name="ObjectDetails"
           component={ObjectDetailsScreen}

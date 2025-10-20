@@ -4,24 +4,11 @@ import Modal from "react-native-modal";
 import { User } from "../types";
 
 type AppMenuBottomSheetProps = {
-  role: "worker" | "foreman";
   onLogout: () => void;
-  onToggleRole: () => void;
-  onManageObjects: () => void;
-  onManageWorkers: () => void;
-  onfinishedWorks: () => void;
   currentUser: User;
 };
 
-export default function AppMenuBottomSheet({
-  role,
-  currentUser,
-  onLogout,
-  onToggleRole,
-  onManageObjects,
-  onManageWorkers,
-  onfinishedWorks,
-}: AppMenuBottomSheetProps) {
+export default function AppMenuBottomSheet({ onLogout }: AppMenuBottomSheetProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   const openMenu = () => setIsVisible(true);
@@ -34,24 +21,6 @@ export default function AppMenuBottomSheet({
       </TouchableOpacity>
       <Modal isVisible={isVisible} onBackdropPress={closeMenu} onBackButtonPress={closeMenu} style={styles.modal}>
         <View style={styles.content}>
-          <TouchableOpacity style={styles.item} onPress={onToggleRole}>
-            <Text>
-              {currentUser.role === "foreman" ? "Переключить роль на рабочего" : "Переключить роль на Прораба"}
-            </Text>
-          </TouchableOpacity>
-          {currentUser.role === "foreman" && (
-            <>
-              <TouchableOpacity style={styles.item} onPress={onManageObjects}>
-                <Text>Управление объектами</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.item} onPress={onManageWorkers}>
-                <Text>Управление рабочими</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.item} onPress={onfinishedWorks}>
-                <Text>Завершенные работы</Text>
-              </TouchableOpacity>
-            </>
-          )}
           <TouchableOpacity style={[styles.item, { marginBottom: 30 }]} onPress={onLogout}>
             <Text>Выйти</Text>
           </TouchableOpacity>
