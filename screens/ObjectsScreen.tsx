@@ -58,32 +58,6 @@ export default function ObjectsScreen({ navigation, route }: ObjectScreenProps) 
           style: "destructive",
           onPress: async () => {
             try {
-              const pendingRes = await authRequest((token) =>
-                api.get(`/objects/${id}/pending-check`, {
-                  headers: { Authorization: `Bearer ${token}` },
-                })
-              );
-              const pending = pendingRes.data;
-              if (pending.hasPending) {
-                Alert.alert("Ошибка", "Нельзя удалить объект, есть непринятые работы");
-                return;
-              }
-              await authRequest((token) =>
-                api.post(`/objects/${id}/export-check`, {}, { headers: { Authorization: `Bearer ${token}` } })
-              );
-              const finishedWorksRes = await authRequest(async (token) => {
-                return await axios.get(`https://api.stroydoks.ru/mobile/objects/${id}/finished-works`, {
-                  headers: { Authorization: `Bearer ${token}` },
-                });
-              });
-              const allFinishedWorksByObject = finishedWorksRes.data;
-              if (allFinishedWorksByObject.length > 0) exportInBilOfQuantities(allFinishedWorksByObject, id, title);
-
-              await authRequest((token) =>
-                api.delete(`/objects/finished-works/${id}`, {
-                  headers: { Authorization: `Bearer ${token}` },
-                })
-              );
               await authRequest((token) =>
                 api.delete(`/objects/${id}`, {
                   headers: { Authorization: `Bearer ${token}` },

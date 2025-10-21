@@ -11,6 +11,7 @@ import WorkersScreen from "./screens/WorkersScreen";
 import ObjectDetailsScreen from "./screens/ObjectDetailsScreen";
 import { FinishedWorksScreen } from "./screens/FinishedWorksScreen";
 import { StatusBar } from "expo-status-bar";
+import ReceivedWorksScreen from "./screens/ReceivedWorksScreen";
 
 export type RootStackParamList = {
   Login: undefined;
@@ -18,7 +19,7 @@ export type RootStackParamList = {
   AuthLoading: undefined;
   Dashboard: { user: User };
   Objects: { currentUser: User };
-  Workers: undefined;
+  ReceivedWorks: { currentUser: User };
   ObjectDetails: { currentUser: User };
   FinishedWorks: { currentUser: User };
 };
@@ -39,10 +40,14 @@ export default function App() {
           options={{ headerShown: false, animation: "none" }}
         />
         <Stack.Screen name="Objects" component={ObjectsScreen} options={{ headerShown: false, animation: "none" }} />
-        <Stack.Screen name="Workers" component={WorkersScreen} options={{ headerShown: false, animation: "none" }} />
         <Stack.Screen
           name="ObjectDetails"
           component={ObjectDetailsScreen}
+          options={{ headerShown: false, animation: "none" }}
+        />
+        <Stack.Screen
+          name="ReceivedWorks"
+          component={ReceivedWorksScreen}
           options={{ headerShown: false, animation: "none" }}
         />
         <Stack.Screen

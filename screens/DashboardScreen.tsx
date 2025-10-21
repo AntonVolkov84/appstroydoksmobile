@@ -41,7 +41,7 @@ export default function DashboardScreen({ route, navigation }: Props) {
           style={styles.shadow}
         >
           <LinearGradient colors={["#4facfe", "#00f2fe"]} style={styles.btn}>
-            <Text style={styles.btnText}>Объекты</Text>
+            <Text style={styles.btnText}>Мои объекты</Text>
           </LinearGradient>
         </TouchableOpacity>
 
@@ -51,11 +51,20 @@ export default function DashboardScreen({ route, navigation }: Props) {
           style={styles.shadow}
         >
           <LinearGradient colors={["#4facfe", "#00f2fe"]} style={styles.btn}>
-            <Text style={styles.btnText}>Учет работ</Text>
+            <Text style={styles.btnText}>Мои работы</Text>
           </LinearGradient>
         </TouchableOpacity>
       </View>
       <View style={styles.blockButton}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate("ReceivedWorks", { currentUser })}
+          style={styles.shadow}
+        >
+          <LinearGradient colors={["#4facfe", "#00f2fe"]} style={styles.btn}>
+            <Text style={styles.btnText}>Входящие работы, назначение объекта</Text>
+          </LinearGradient>
+        </TouchableOpacity>
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => navigation.navigate("FinishedWorks", { currentUser })}
@@ -66,7 +75,6 @@ export default function DashboardScreen({ route, navigation }: Props) {
           </LinearGradient>
         </TouchableOpacity>
       </View>
-
       <AppMenuBottomSheet currentUser={currentUser} onLogout={handleLogout} />
     </View>
   );
@@ -116,7 +124,7 @@ const styles = StyleSheet.create({
   },
   btnText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: "600",
     textAlign: "center",
   },

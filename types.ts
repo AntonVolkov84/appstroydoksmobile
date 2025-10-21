@@ -14,7 +14,7 @@ export interface User {
 
 export type ObjectItem = {
   id: number;
-  name: string;
+  title: string;
   address: string;
 };
 type WorkDeletedMessage = { workId: number };
@@ -35,11 +35,26 @@ export interface ObjectItemData {
 export interface WorkItem {
   id: number;
   objectId: number;
+  object_title: string;
   title: string;
   unit: string;
   quantity: number;
   accepted: boolean;
   createdBy: number;
+}
+export interface ReceivedWirkItem {
+  created_at: string;
+  id: number;
+  object_id: number;
+  object_title: string;
+  quantity: string;
+  recipient_id: number;
+  sender_name: string;
+  sender_surname: string;
+  title: string;
+  unit: string;
+  updated_at: string;
+  worker_id: number;
 }
 export type FinishedWork = {
   id: number;

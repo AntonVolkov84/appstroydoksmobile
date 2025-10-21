@@ -44,7 +44,7 @@ export default function LoginScreen({ navigation }: Props) {
       <View style={styles.passwordContainer}>
         <TextInput
           placeholder="Пароль"
-          // style={[styles.input, { flex: 1, marginVertical: 0 }]}
+          style={{ flex: 1, marginVertical: 0 }}
           secureTextEntry={!showPassword}
           value={password}
           onChangeText={setPassword}
