@@ -1,45 +1,37 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Alert,
-  FlatList,
-  TouchableOpacity,
-  Modal,
-  ActivityIndicator,
-  ScrollView,
-} from "react-native";
-import { FinishedWork, ObjectItemData } from "../types";
-import { authRequest } from "../api";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, Alert, ScrollView } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
+import { ObjectItemData, FinishedWork } from "../types";
 import Button from "../components/Button";
+import { authRequest } from "../api";
+import api from "../api";
 import axios from "axios";
 
-type FinishedWorksProps = NativeStackScreenProps<RootStackParamList, "FinishedWorks">;
+type Props = NativeStackScreenProps<RootStackParamList, "FinishedWorks">;
 
-export const FinishedWorksScreen = ({ navigation, route }: FinishedWorksProps) => {
-  const [works, setWorks] = useState<FinishedWork[]>([]);
+export const FinishedWorksScreen = ({ navigation, route }: Props) => {
+  const { currentUser } = route.params;
   const [objects, setObjects] = useState<ObjectItemData[]>([]);
   const [selectedObject, setSelectedObject] = useState<ObjectItemData | null>(null);
-  const [sortField, setSortField] = useState<"object" | "worker" | "date">("date");
+  const [works, setWorks] = useState<FinishedWork[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const [modalVisibleObjects, setModalVisibleObjects] = useState(false);
+
   const [selectedWorker, setSelectedWorker] = useState<number | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [modalVisibleObjects, setModalVisibleObjects] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const { currentUser } = route.params ?? { currentUser: null };
 
   const fetchObjects = async () => {
     try {
-      const res = await authRequest(async (token) => {
-        return await axios.get("https://api.stroydoks.ru/mobile/objects", {
+      const res = await authRequest(async (token) =>
+        api.get("/objects", {
           headers: { Authorization: `Bearer ${token}` },
-        });
-      });
+        })
+      );
       setObjects(res.data);
     } catch (err) {
-      console.log("fetchObjects", err);
+      console.log("fetchObjects error", err);
     }
   };
 
@@ -47,14 +39,19 @@ export const FinishedWorksScreen = ({ navigation, route }: FinishedWorksProps) =
     if (!selectedObject?.id) return;
     setLoading(true);
     try {
-      const res = await authRequest(async (token) => {
-        return await axios.get(`https://api.stroydoks.ru/mobile/objects/${selectedObject.id}/finished-works`, {
+      const res = await authRequest(async (token) =>
+        api.get(`/sendworks/finishedworks`, {
           headers: { Authorization: `Bearer ${token}` },
-        });
-      });
+          params: {
+            object_id: selectedObject.id,
+            status: "accepted",
+          },
+        })
+      );
+      console.log(res.data);
       setWorks(res.data);
     } catch (err) {
-      console.log("fetchWorks error:", err);
+      console.log("fetchWorks error", err);
     } finally {
       setLoading(false);
     }
@@ -65,182 +62,134 @@ export const FinishedWorksScreen = ({ navigation, route }: FinishedWorksProps) =
   }, []);
 
   useEffect(() => {
-    if (selectedObject?.id) {
+    if (selectedObject) {
       setWorks([]);
       setSelectedWorker(null);
       setSelectedDate(null);
       fetchWorks();
     }
-  }, [selectedObject?.id]);
+  }, [selectedObject]);
 
   const uniqueWorkers = Array.from(
-    new Map(works.map((w) => [w.worker_id, { id: w.worker_id, name: `${w.worker_surname} ${w.worker_name}` }])).values()
+    new Map(works.map((w) => [w.worker_id, { id: w.worker_id, name: `${w.surname} ${w.name}` }])).values()
   );
 
-  const uniqueDates = Array.from(new Set(works.map((w) => new Date(w.confirmed_at).toLocaleDateString("ru-RU")))).sort(
+  const uniqueDates = Array.from(new Set(works.map((w) => new Date(w.updated_at).toLocaleDateString("ru-RU")))).sort(
     (a, b) => new Date(b).getTime() - new Date(a).getTime()
   );
 
   const filteredWorks = works.filter((w) => {
     const workerMatch = selectedWorker ? w.worker_id === selectedWorker : true;
-    const dateMatch = selectedDate ? new Date(w.confirmed_at).toLocaleDateString("ru-RU") === selectedDate : true;
+    const dateMatch = selectedDate ? new Date(w.updated_at).toLocaleDateString("ru-RU") === selectedDate : true;
     return workerMatch && dateMatch;
   });
 
-  const sortedWorks = [...filteredWorks].sort((a, b) => {
-    switch (sortField) {
-      case "object":
-        return a.object_id - b.object_id;
-      case "worker":
-        return a.worker_id - b.worker_id;
-      case "date":
-      default:
-        return new Date(b.confirmed_at).getTime() - new Date(a.confirmed_at).getTime();
+  const exportReport = async () => {
+    if (!currentUser || !selectedObject) return;
+    if (filteredWorks.length === 0) {
+      Alert.alert("Ошибка", "Нет данных для экспорта");
+      return;
     }
-  });
 
-  const exportInBilOfQuantities = async () => {
+    const title = `${selectedObject.title} — ${
+      selectedWorker ? uniqueWorkers.find((w) => w.id === selectedWorker)?.name : "Все рабочие"
+    }, ${selectedDate ?? "Все даты"}`;
+    const rows = filteredWorks.map((w) => ({
+      name: w.title,
+      unit: w.unit,
+      quantity: String(w.quantity),
+    }));
+
     try {
-      if (!currentUser?.id) {
-        Alert.alert("Ошибка", "Не удалось определить пользователя");
-        return;
-      }
-      if (!selectedObject) {
-        Alert.alert("Ошибка", "Выберите объект перед экспортом");
-        return;
-      }
-
-      if (filteredWorks.length === 0) {
-        Alert.alert("Ошибка", "Нет данных для экспорта");
-        return;
-      }
-
-      const workerInfo = selectedWorker ? uniqueWorkers.find((w) => w.id === selectedWorker)?.name : "все рабочие";
-      const formattedDate = selectedDate ? selectedDate : "все даты";
-      const title = `${selectedObject.title} — ${workerInfo}, ${formattedDate}`;
-
-      const rows = filteredWorks.map((w) => ({
-        name: w.title,
-        unit: w.unit,
-        quantity: String(w.quantity),
-      }));
-
-      await authRequest(async (token) => {
-        await axios.post(
+      await authRequest(async (token) =>
+        axios.post(
           "https://api.stroydoks.ru/mobile/savebillbook",
-          {
-            userId: currentUser.id,
-            title,
-            rows,
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-      });
-
+          { userId: currentUser.id, title, rows },
+          { headers: { Authorization: `Bearer ${token}` } }
+        )
+      );
       Alert.alert("Успех", "Ведомость успешно сохранена на сайте");
     } catch (err) {
-      console.log("exportInBilOfQuantities", err);
+      console.log("exportReport error", err);
       Alert.alert("Ошибка", "Не удалось сохранить ведомость");
     }
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.filtersContainer}>
-        <Button
-          textStyle={{ fontSize: 20 }}
-          title={selectedObject ? selectedObject.title : "Выберите объект"}
-          onPress={() => setModalVisibleObjects(true)}
-          containerStyle={{ marginTop: 2, marginBottom: 8 }}
-        />
-
-        <ScrollView horizontal contentContainerStyle={styles.horizontalScroll} showsHorizontalScrollIndicator={false}>
+      <Button
+        title={selectedObject ? selectedObject.title : "Выберите объект"}
+        onPress={() => setModalVisibleObjects(true)}
+        containerStyle={{ marginBottom: 10 }}
+      />
+      <View style={styles.filtersWrapper}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filtersScrollContent}
+        >
           <Button
+            title="Все рабочие"
             containerStyle={{
               backgroundColor: !selectedWorker ? "#ff001e" : "#007AFF",
-              height: 40,
-              alignItems: "center",
-              justifyContent: "center",
-              paddingVertical: 5,
+              marginRight: 8,
             }}
-            title="Все рабочие"
             onPress={() => setSelectedWorker(null)}
           />
           {uniqueWorkers.map((w) => (
             <Button
               key={w.id}
-              containerStyle={{
-                marginLeft: 8,
-                backgroundColor: selectedWorker === w.id ? "#ff001e" : "#007AFF",
-                height: 40,
-                alignItems: "center",
-                justifyContent: "center",
-                paddingVertical: 5,
-              }}
               title={w.name}
+              containerStyle={{
+                backgroundColor: selectedWorker === w.id ? "#ff001e" : "#007AFF",
+                marginRight: 8,
+              }}
               onPress={() => setSelectedWorker(w.id)}
             />
           ))}
           <Button
-            containerStyle={{
-              marginLeft: 8,
-              height: 40,
-              alignItems: "center",
-              justifyContent: "center",
-              paddingVertical: 5,
-              backgroundColor: !selectedDate ? "#ff001e" : "#007AFF",
-            }}
             title="Все даты"
+            containerStyle={{
+              backgroundColor: !selectedDate ? "#ff001e" : "#007AFF",
+              marginRight: 8,
+            }}
             onPress={() => setSelectedDate(null)}
           />
-          {uniqueDates.map((d) => (
+          {uniqueDates.map((d, index) => (
             <Button
-              key={d}
-              containerStyle={{
-                marginLeft: 8,
-                height: 40,
-                alignItems: "center",
-                justifyContent: "center",
-                paddingVertical: 5,
-                backgroundColor: selectedDate === d ? "#ff001e" : "#007AFF",
-              }}
+              key={`${d}-${index}`}
               title={d}
+              containerStyle={{
+                backgroundColor: selectedDate === d ? "#ff001e" : "#007AFF",
+                marginRight: 8,
+              }}
               onPress={() => setSelectedDate(d)}
             />
           ))}
         </ScrollView>
-
-        <View style={styles.sortButtons}>
-          <Button containerStyle={styles.sortButton} title="По рабочему" onPress={() => setSortField("worker")} />
-          <Button containerStyle={styles.sortButton} title="По дате" onPress={() => setSortField("date")} />
-        </View>
       </View>
       <FlatList
-        style={styles.list}
-        data={sortedWorks}
-        keyExtractor={(item) => item.id.toString()}
+        data={filteredWorks}
+        keyExtractor={(item, index) => `${item.id}-${index}`}
+        ListEmptyComponent={<Text style={{ textAlign: "center", marginTop: 20 }}>Нет принятых работ</Text>}
         renderItem={({ item }) => (
           <View style={styles.workCard}>
             <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.details}>
+            <Text>
               Кол-во: {item.quantity} {item.unit}
             </Text>
-            <Text style={styles.details}>
-              Рабочий: {item.worker_surname} {item.worker_name}
+            <Text>
+              Рабочий: {item.surname} {item.name}
             </Text>
-            <Text style={styles.details}>Подтверждена: {new Date(item.confirmed_at).toLocaleString()}</Text>
+            <Text>Дата: {new Date(item.updated_at).toLocaleString()}</Text>
           </View>
         )}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
       />
-      <View style={styles.bottomButtons}>
-        <Button
-          containerStyle={{ marginBottom: 8 }}
-          title="Отправить на сайт в форму"
-          onPress={() => exportInBilOfQuantities()}
-        />
-        <Button containerStyle={{ marginBottom: 30 }} title="Назад" onPress={() => navigation.goBack()} />
+      <View style={styles.buttonsContainer}>
+        <Button title="Отправить на сайт в форму" onPress={exportReport} containerStyle={{ marginBottom: 10 }} />
+        <Button title="Назад" containerStyle={{ marginBottom: 70 }} onPress={() => navigation.goBack()} />
       </View>
       <Modal visible={modalVisibleObjects} animationType="slide">
         <View style={styles.modalContainer}>
@@ -256,11 +205,11 @@ export const FinishedWorksScreen = ({ navigation, route }: FinishedWorksProps) =
                 }}
                 style={styles.modalItem}
               >
-                <Text style={styles.modalItemText}>{item.title}</Text>
+                <Text>{item.title}</Text>
               </TouchableOpacity>
             )}
           />
-          <Button containerStyle={{ marginBottom: 40 }} title="Закрыть" onPress={() => setModalVisibleObjects(false)} />
+          <Button title="Закрыть" onPress={() => setModalVisibleObjects(false)} />
         </View>
       </Modal>
     </View>
@@ -270,76 +219,28 @@ export const FinishedWorksScreen = ({ navigation, route }: FinishedWorksProps) =
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 10,
+    padding: 12,
     paddingTop: 50,
   },
-  filtersContainer: {
-    marginBottom: 8,
+  filtersWrapper: {
+    height: 50,
+    marginBottom: 10,
   },
-  horizontalScroll: {
+  filtersScrollContent: {
     alignItems: "center",
-    height: 42,
-    marginBottom: 8,
-  },
-  sortButtons: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-  },
-  sortButton: {
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 5,
-  },
-  list: {
-    flex: 1,
+    paddingHorizontal: 0,
   },
   workCard: {
     padding: 12,
     marginBottom: 8,
-    borderRadius: 8,
     backgroundColor: "#fff",
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: "#ccc",
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
   },
-  title: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-  details: {
-    fontSize: 14,
-    color: "#555",
-  },
-  bottomButtons: {
-    paddingVertical: 8,
-    marginBottom: 40,
-  },
-  modalContainer: {
-    flex: 1,
-    paddingTop: 40,
-    padding: 16,
-    backgroundColor: "#f7f7f7",
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 16,
-  },
-  modalItem: {
-    padding: 12,
-    borderBottomWidth: 1,
-    borderColor: "#ccc",
-    backgroundColor: "#fff",
-    marginBottom: 4,
-    borderRadius: 6,
-  },
-  modalItemText: {
-    fontSize: 18,
-  },
+  title: { fontWeight: "bold", marginBottom: 4 },
+  buttonsContainer: { marginTop: 10 },
+  modalContainer: { flex: 1, paddingTop: 40, paddingHorizontal: 16 },
+  modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 16 },
+  modalItem: { padding: 12, borderBottomWidth: 1, borderColor: "#ccc" },
 });

@@ -64,9 +64,10 @@ export type FinishedWork = {
   title: string;
   unit: string;
   quantity: number;
-  accepted: boolean;
-  confirmed_at: string;
-  worker_name: string;
-  worker_surname: string;
-  worker_username: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  name: string;
+  surname: string;
+  username: string;
 };

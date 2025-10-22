@@ -85,6 +85,11 @@ export default function DashboardScreen({ route, navigation }: Props) {
             <Text style={styles.btnText}>Принятые работы</Text>
           </LinearGradient>
         </TouchableOpacity>
+        <TouchableOpacity activeOpacity={0.8} onPress={() => console.log("Экран истории")} style={styles.shadow}>
+          <LinearGradient colors={["#4facfe", "#00f2fe"]} style={styles.btn}>
+            <Text style={styles.btnText}>История отправленных работ</Text>
+          </LinearGradient>
+        </TouchableOpacity>
       </View>
       <AppMenuBottomSheet currentUser={currentUser} onLogout={handleLogout} />
     </View>
