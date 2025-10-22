@@ -62,9 +62,20 @@ export default function DashboardScreen({ route, navigation }: Props) {
           style={styles.shadow}
         >
           <LinearGradient colors={["#4facfe", "#00f2fe"]} style={styles.btn}>
-            <Text style={styles.btnText}>Входящие работы, назначение объекта</Text>
+            <Text style={styles.btnText}>Назначение объекта</Text>
           </LinearGradient>
         </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate("InspectionWorks", { currentUser })}
+          style={styles.shadow}
+        >
+          <LinearGradient colors={["#4facfe", "#00f2fe"]} style={styles.btn}>
+            <Text style={styles.btnText}>Входящие работы</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.blockButton}>
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => navigation.navigate("FinishedWorks", { currentUser })}

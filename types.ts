@@ -41,6 +41,7 @@ export interface WorkItem {
   quantity: number;
   accepted: boolean;
   createdBy: number;
+  status: "sent" | "accepted";
 }
 export interface ReceivedWirkItem {
   created_at: string;
