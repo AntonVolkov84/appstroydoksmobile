@@ -58,6 +58,28 @@ export default function ObjectsScreen({ navigation, route }: ObjectScreenProps) 
           style: "destructive",
           onPress: async () => {
             try {
+              const pendingRes = await authRequest((token) =>
+                api.get(`/sendworks`, {
+                  headers: { Authorization: `Bearer ${token}` },
+                  params: { object_id: id },
+                })
+              );
+              const hasUnacceptedWorks = pendingRes.data.some((work: any) => work.status === "sent");
+              if (hasUnacceptedWorks) {
+                Alert.alert("Невозможно удалить объект", "Существуют непринятые работы. Сначала их нужно принять.");
+                return;
+              }
+              await authRequest((token) =>
+                api.post(
+                  `/objects/${id}/backup`,
+                  {
+                    object_id: id,
+                  },
+                  {
+                    headers: { Authorization: `Bearer ${token}` },
+                  }
+                )
+              );
               await authRequest((token) =>
                 api.delete(`/objects/${id}`, {
                   headers: { Authorization: `Bearer ${token}` },
@@ -75,42 +97,6 @@ export default function ObjectsScreen({ navigation, route }: ObjectScreenProps) 
     );
   };
 
-  const exportInBilOfQuantities = async (allFinishedWorksByObject: FinishedWork[], id: number, title: string) => {
-    try {
-      if (!currentUser?.id) {
-        Alert.alert("Ошибка", "Не удалось определить пользователя");
-        return;
-      }
-      if (!id) {
-        Alert.alert("Ошибка", "Выберите объект перед экспортом");
-        return;
-      }
-      const titleFinishedWorks = `${title} — За все время по объекту`;
-
-      const rows = allFinishedWorksByObject.map((w) => ({
-        name: w.title,
-        unit: w.unit,
-        quantity: String(w.quantity),
-      }));
-
-      await authRequest(async (token) => {
-        await axios.post(
-          "https://api.stroydoks.ru/mobile/savebillbook",
-          {
-            userId: currentUser.id,
-            title: titleFinishedWorks,
-            rows,
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-      });
-    } catch (err) {
-      console.log("exportInBilOfQuantities", err);
-      Alert.alert("Ошибка", "Не удалось сохранить ведомость");
-    }
-  };
   const renderItem = ({ item }: { item: ObjectItemData }) => (
     <View style={styles.item}>
       <View>

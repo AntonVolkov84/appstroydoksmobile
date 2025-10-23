@@ -4,7 +4,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
 import { WorkItem } from "../types";
 import api, { authRequest } from "../api";
-import { User } from "../types";
+import { User, ObjectItemData } from "../types";
 import Button from "../components/Button";
 import { Pencil, Trash2, Copy } from "lucide-react-native";
 
@@ -28,6 +28,10 @@ export default function ObjectDetailsScreen({ route, navigation }: Props) {
   const [recipients, setRecipients] = useState<User[]>([]);
   const [selectedRecipient, setSelectedRecipient] = useState<number | null>(null);
   const [emailInput, setEmailInput] = useState("");
+  const [exportModalVisible, setExportModalVisible] = useState(false);
+  const [objects, setObjects] = useState<ObjectItemData[]>([]);
+  const [selectedObject, setSelectedObject] = useState<number | null>(null);
+  const [addWorkModalVisible, setAddWorkModalVisible] = useState(false);
 
   const openEditModal = (work: WorkItem) => {
     setEditWorkItem(work);
@@ -210,29 +214,48 @@ export default function ObjectDetailsScreen({ route, navigation }: Props) {
       Alert.alert("Ошибка", "Не удалось отправить работы");
     }
   };
+  const exportWorks = async () => {
+    if (!selectedObject) {
+      Alert.alert("Ошибка", "Выберите объект");
+      return;
+    }
+    try {
+      await authRequest(async (token) => {
+        await api.post(
+          "/sendworks/export",
+          { object_id: selectedObject },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      });
+      Alert.alert("Успех", "Работы экспортированы");
+      setExportModalVisible(false);
+    } catch (err) {
+      console.log("exportWorks error:", err);
+      Alert.alert("Ошибка", "Не удалось экспортировать работы");
+    }
+  };
+
+  const getObjects = async () => {
+    try {
+      await authRequest(async (token) => {
+        const res = await api.get("/objects", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setObjects(res.data);
+      });
+    } catch (err) {
+      console.log("getObjects error:", err);
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <View style={styles.form}>
-        <TextInput placeholder="Название" value={title} onChangeText={setTitle} style={styles.input} />
-        <TextInput placeholder="Ед. изм." value={unit} onChangeText={setUnit} style={styles.input} />
-        <TextInput
-          placeholder="Количество"
-          value={quantity}
-          onChangeText={setQuantity}
-          style={styles.input}
-          keyboardType="numeric"
-        />
-        <Button title="Добавить" onPress={addWork} />
-      </View>
-
       <View style={styles.tableHeader}>
         <Text style={[styles.cell, styles.colTitle]}>Название</Text>
         <Text style={[styles.cell, styles.colUnit]}>Ед.</Text>
         <Text style={[styles.cell, styles.colQty]}>Кол-во</Text>
         <Text style={[styles.cell, styles.colActions]}>Действия</Text>
       </View>
-
       <FlatList
         data={works}
         keyExtractor={(item) => item.id.toString()}
@@ -271,9 +294,21 @@ export default function ObjectDetailsScreen({ route, navigation }: Props) {
           </View>
         )}
       />
-
-      <Button containerStyle={{ marginBottom: 20 }} title="Сдать работу" onPress={handleSubmitWork} />
-      <Button containerStyle={{ marginBottom: 50 }} title="Назад" onPress={() => navigation.goBack()} />
+      <Button
+        title="Добавить работу"
+        containerStyle={{ marginTop: 10, marginBottom: 10 }}
+        onPress={() => setAddWorkModalVisible(true)}
+      />
+      <Button
+        title="Экспортировать работы"
+        containerStyle={{ marginBottom: 10 }}
+        onPress={() => {
+          setExportModalVisible(true);
+          getObjects();
+        }}
+      />
+      <Button containerStyle={{ marginBottom: 10 }} title="Сдать работу" onPress={handleSubmitWork} />
+      <Button containerStyle={{ marginBottom: 70 }} title="Назад" onPress={() => navigation.goBack()} />
       <Modal visible={recipientModalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -331,12 +366,66 @@ export default function ObjectDetailsScreen({ route, navigation }: Props) {
           </View>
         </View>
       </Modal>
+      <Modal visible={exportModalVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={{ fontSize: 18, fontWeight: "600", marginBottom: 10 }}>Выберите объект для экспорта</Text>
+            <FlatList
+              data={objects}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[styles.objectItem, selectedObject === item.id && { backgroundColor: "#d9eaff" }]}
+                  onPress={() => setSelectedObject(item.id)}
+                >
+                  <Text style={{ fontSize: 16 }}>{item.title}</Text>
+                </TouchableOpacity>
+              )}
+              ListEmptyComponent={<Text style={{ color: "#666", textAlign: "center" }}>Нет доступных объектов</Text>}
+            />
+            <Button
+              containerStyle={{ marginBottom: 10 }}
+              title="Экспортировать"
+              onPress={() => {
+                exportWorks();
+                getWorks();
+              }}
+            />
+            <Button title="Отмена" onPress={() => setExportModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
+      <Modal visible={addWorkModalVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={{ fontSize: 18, marginBottom: 10 }}>Добавить новую работу</Text>
+            <TextInput placeholder="Название" value={title} onChangeText={setTitle} style={styles.input} />
+            <TextInput placeholder="Ед. изм." value={unit} onChangeText={setUnit} style={styles.input} />
+            <TextInput
+              placeholder="Количество"
+              value={quantity}
+              onChangeText={setQuantity}
+              style={styles.input}
+              keyboardType="numeric"
+            />
+            <Button
+              title="Добавить"
+              containerStyle={{ marginBottom: 10 }}
+              onPress={() => {
+                addWork();
+                setAddWorkModalVisible(false);
+              }}
+            />
+            <Button title="Отмена" onPress={() => setAddWorkModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 15 },
+  container: { flex: 1, padding: 15, paddingTop: 30 },
   form: { marginBottom: 20, marginTop: 70 },
   input: { borderWidth: 1, borderColor: "#ccc", padding: 8, marginBottom: 10, borderRadius: 6 },
   modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.3)", justifyContent: "center", alignItems: "center" },
@@ -366,6 +455,13 @@ const styles = StyleSheet.create({
   colActions: { flex: 2.2, alignItems: "center", textAlign: "center" },
   actionButton: { width: 28, height: 28, borderRadius: 6, alignItems: "center", justifyContent: "center" },
   recipientItem: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  objectItem: {
     padding: 10,
     borderWidth: 1,
     borderColor: "#ddd",

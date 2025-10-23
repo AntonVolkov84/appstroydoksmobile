@@ -71,3 +71,6 @@ export type FinishedWork = {
   surname: string;
   username: string;
 };
+export interface HistoryWorksData extends FinishedWork {
+  object_title: string;
+}

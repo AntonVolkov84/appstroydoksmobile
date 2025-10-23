@@ -12,6 +12,7 @@ import { FinishedWorksScreen } from "./screens/FinishedWorksScreen";
 import { StatusBar } from "expo-status-bar";
 import InspectionWorksScreen from "./screens/InspectionWorksScreen";
 import ReceivedWorksScreen from "./screens/ReceivedWorksScreen";
+import { SentWorksHistoryScreen } from "./screens/SentWorksHistoryScreen";
 
 export type RootStackParamList = {
   Login: undefined;
@@ -23,6 +24,7 @@ export type RootStackParamList = {
   ObjectDetails: { currentUser: User };
   FinishedWorks: { currentUser: User };
   InspectionWorks: { currentUser: User };
+  SentWorksHistory: { currentUser: User };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -44,6 +46,11 @@ export default function App() {
         <Stack.Screen
           name="ObjectDetails"
           component={ObjectDetailsScreen}
+          options={{ headerShown: false, animation: "none" }}
+        />
+        <Stack.Screen
+          name="SentWorksHistory"
+          component={SentWorksHistoryScreen}
           options={{ headerShown: false, animation: "none" }}
         />
         <Stack.Screen

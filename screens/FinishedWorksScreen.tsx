@@ -48,7 +48,6 @@ export const FinishedWorksScreen = ({ navigation, route }: Props) => {
           },
         })
       );
-      console.log(res.data);
       setWorks(res.data);
     } catch (err) {
       console.log("fetchWorks error", err);
@@ -171,7 +170,9 @@ export const FinishedWorksScreen = ({ navigation, route }: Props) => {
       <FlatList
         data={filteredWorks}
         keyExtractor={(item, index) => `${item.id}-${index}`}
-        ListEmptyComponent={<Text style={{ textAlign: "center", marginTop: 20 }}>Нет принятых работ</Text>}
+        ListEmptyComponent={
+          <Text style={{ textAlign: "center", marginTop: 20 }}>Нет принятых работ или не выбран объект</Text>
+        }
         renderItem={({ item }) => (
           <View style={styles.workCard}>
             <Text style={styles.title}>{item.title}</Text>
