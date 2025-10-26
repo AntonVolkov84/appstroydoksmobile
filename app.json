@@ -2,8 +2,8 @@
   "expo": {
     "name": "Stroydoks",
     "slug": "stroydoks-app",
-    "version": "1.0.9",
-    "orientation": "portrait",
+    "version": "1.1.1",
+    "orientation": "default",
     "icon": "./assets/LogoBrowserwithoutBG.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,

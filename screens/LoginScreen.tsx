@@ -5,7 +5,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Button from "../components/Button";
-import Logo from "../assets/LogoBrowserwithoutBG.png";
+import Logo from "../assets/logo.png";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
@@ -85,8 +85,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   image: {
-    width: 100,
-    height: 100,
+    width: 150,
+    height: 150,
     objectFit: "contain",
   },
   titleName: {
