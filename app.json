@@ -2,13 +2,13 @@
   "expo": {
     "name": "Stroydoks",
     "slug": "stroydoks-app",
-    "version": "1.1.1",
-    "orientation": "default",
-    "icon": "./assets/LogoBrowserwithoutBG.png",
+    "version": "1.1.2",
+    "orientation": "portrait",
+    "icon": "./assets/logoBtn.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/LogoBrowserwithoutBG.png",
+      "image": "./assets/logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/LogoBrowserwithoutBG.png",
+        "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
@@ -25,7 +25,7 @@
       "package": "com.ant_volkov.stroydoksapp"
     },
     "web": {
-      "favicon": "./assets/LogoBrowserwithoutBG.png"
+      "favicon": "./assets/logo.png"
     },
     "extra": {
       "eas": {

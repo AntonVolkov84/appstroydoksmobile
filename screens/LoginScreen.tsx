@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     padding: 20,
     elevation: 3,
   },
-  title: { fontSize: 26, fontWeight: "700", textAlign: "center", marginBottom: 20 },
+  title: { fontSize: 26, fontWeight: "700", textAlign: "center", marginBottom: 20, color: "#205160" },
   input: {
     borderWidth: 1,
     borderColor: "#ddd",
@@ -91,6 +91,7 @@ const styles = StyleSheet.create({
   },
   titleName: {
     fontSize: 30,
+    color: "#205160",
   },
   passwordContainer: {
     flexDirection: "row",

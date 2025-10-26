@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, Dimensions, Modal, Alert, TouchableOpacity, Switch } from "react-native";
+import { View, Text, FlatList, StyleSheet, Modal, Alert, TouchableOpacity, Switch } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
 import api, { authRequest } from "../api";
 import Button from "../components/Button";
 import { ReceivedWirkItem, ObjectItem } from "../types";
-
-const { width, height } = Dimensions.get("window");
-const isPortrait = height >= width;
 
 type Props = NativeStackScreenProps<RootStackParamList, "ReceivedWorks">;
 
@@ -139,11 +136,7 @@ export default function ReceivedWorksScreen({ navigation }: Props) {
       />
 
       <Button title="Назначить объект" containerStyle={{ marginBottom: 10 }} onPress={openAssignModal} />
-      <Button
-        title="Назад"
-        containerStyle={{ marginBottom: isPortrait ? 70 : 10 }}
-        onPress={() => navigation.goBack()}
-      />
+      <Button title="Назад" containerStyle={{ marginBottom: 70 }} onPress={() => navigation.goBack()} />
 
       <Modal visible={objectModalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
@@ -168,9 +161,13 @@ export default function ReceivedWorksScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 15, paddingTop: isPortrait ? 50 : 30 },
-  header: { fontSize: 20, fontWeight: "600", marginBottom: isPortrait ? 10 : 3 },
-  filterRow: { flexDirection: "row", justifyContent: "flex-end", marginBottom: isPortrait ? 10 : 3 },
+  container: { flex: 1, padding: 15, paddingTop: 50 },
+  header: { fontSize: 20, fontWeight: "600", marginBottom: 10 },
+  filterRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginBottom: 10,
+  },
   filterButton: {
     backgroundColor: "#eee",
     paddingHorizontal: 12,
@@ -184,7 +181,7 @@ const styles = StyleSheet.create({
   tableHeader: {
     flexDirection: "row",
     backgroundColor: "#f0f0f0",
-    paddingVertical: isPortrait ? 10 : 0,
+    paddingVertical: 10,
     borderBottomWidth: 1,
     borderColor: "#ccc",
     borderTopLeftRadius: 8,

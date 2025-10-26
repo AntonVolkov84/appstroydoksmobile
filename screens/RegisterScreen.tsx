@@ -4,7 +4,7 @@ import axios from "axios";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
 import Button from "../components/Button";
-import Logo from "../assets/LogoBrowserwithoutBG.png";
+import Logo from "../assets/logo.png";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Register">;
 
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     padding: 20,
     elevation: 3,
   },
-  title: { fontSize: 26, fontWeight: "700", textAlign: "center", marginBottom: 20 },
+  title: { fontSize: 26, fontWeight: "700", textAlign: "center", marginBottom: 20, color: "#205160" },
   input: {
     borderWidth: 1,
     width: 200,
@@ -86,5 +86,6 @@ const styles = StyleSheet.create({
   },
   titleName: {
     fontSize: 30,
+    color: "#205160",
   },
 });
