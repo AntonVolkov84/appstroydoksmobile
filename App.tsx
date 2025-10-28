@@ -5,7 +5,7 @@ import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from "./screens/RegisterScreen";
 import DashboardScreen from "./screens/DashboardScreen";
 import AuthLoading from "./screens/AuthLoadingScreen";
-import { User, ObjectItemData } from "./types";
+import { User } from "./types";
 import ObjectsScreen from "./screens/ObjectsScreen";
 import ObjectDetailsScreen from "./screens/ObjectDetailsScreen";
 import { FinishedWorksScreen } from "./screens/FinishedWorksScreen";

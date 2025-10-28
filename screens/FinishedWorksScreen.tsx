@@ -210,7 +210,7 @@ export const FinishedWorksScreen = ({ navigation, route }: Props) => {
               </TouchableOpacity>
             )}
           />
-          <Button title="Закрыть" onPress={() => setModalVisibleObjects(false)} />
+          <Button containerStyle={{ marginBottom: 70 }} title="Закрыть" onPress={() => setModalVisibleObjects(false)} />
         </View>
       </Modal>
     </View>
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
   },
   title: { fontWeight: "bold", marginBottom: 4 },
   buttonsContainer: { marginTop: 10 },
-  modalContainer: { flex: 1, paddingTop: 40, paddingHorizontal: 16 },
+  modalContainer: { flex: 1, paddingTop: 20, paddingHorizontal: 16 },
   modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 16 },
   modalItem: { padding: 12, borderBottomWidth: 1, borderColor: "#ccc" },
 });

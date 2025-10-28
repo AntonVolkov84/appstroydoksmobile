@@ -95,7 +95,10 @@ export const SentWorksHistoryScreen = ({ navigation, route }: Props) => {
                 </Text>
                 <Text style={[styles.cell, styles.colUnit]}>{item.unit}</Text>
                 <Text style={[styles.cell, styles.colQty]}>{item.quantity}</Text>
-                <Text style={[styles.cell, styles.colObject]} numberOfLines={1}>
+                <Text
+                  style={[styles.cell, styles.colObject, item.object_title === "Нет еще" && styles.noObject]}
+                  numberOfLines={1}
+                >
                   {item.object_title}
                 </Text>
                 <Text style={[styles.cell, styles.colDate]}>
@@ -139,4 +142,8 @@ const styles = StyleSheet.create({
   colQty: { width: 60, textAlign: "center", fontWeight: "500" },
   colObject: { flex: 1.3, textAlign: "center" },
   colDate: { width: 90, textAlign: "center" },
+  noObject: {
+    color: "#888",
+    fontStyle: "italic",
+  },
 });
